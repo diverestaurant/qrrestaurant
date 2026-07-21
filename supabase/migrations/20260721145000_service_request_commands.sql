@@ -46,7 +46,7 @@ begin
 
   insert into public.service_requests (id, restaurant_id, branch_id, session_id, request_type, note, priority)
   values (p_request_id, v_restaurant_id, v_branch_id, p_session_id, p_request_type, nullif(trim(p_note), ''), case when p_request_type = 'BILL' then 3 when p_request_type = 'CALL_WAITER' then 2 else 1 end);
-  insert into public.audit_logs (restaurant_id, branch_id, actor_id, actor_type, action, entity_type, entity_id, reason, after_masked, correlation_id)
+  insert into public.audit_logs (restaurant_id, branch_id, actor_id, actor_role, action, entity_type, entity_id, reason, after_masked, correlation_id)
   values (v_restaurant_id, v_branch_id, auth.uid(), 'CUSTOMER', 'service_request.created', 'service_request', p_request_id, 'Customer Session capability', jsonb_build_object('requestType', p_request_type, 'state', 'OPEN', 'version', 1), gen_random_uuid());
   insert into public.outbox_events (restaurant_id, branch_id, event_type, entity_type, entity_id, entity_version, payload)
   values (v_restaurant_id, v_branch_id, 'service_request.created', 'service_request', p_request_id, 1, jsonb_build_object('sessionId', p_session_id, 'requestType', p_request_type, 'state', 'OPEN', 'version', 1));
@@ -85,7 +85,7 @@ begin
   end if;
   v_new_version := v_current_version + 1;
   update public.service_requests sr set state = p_next_state, version = v_new_version, assigned_to = case when p_next_state = 'CLAIMED' then auth.uid() else sr.assigned_to end where sr.id = p_request_id;
-  insert into public.audit_logs (restaurant_id, branch_id, actor_id, actor_type, action, entity_type, entity_id, reason, before_masked, after_masked, correlation_id)
+  insert into public.audit_logs (restaurant_id, branch_id, actor_id, actor_role, action, entity_type, entity_id, reason, before_masked, after_masked, correlation_id)
   values (v_restaurant_id, v_branch_id, auth.uid(), 'STAFF', 'service_request.transitioned', 'service_request', p_request_id, 'Authorized waiter command', jsonb_build_object('state', v_current_state, 'version', v_current_version), jsonb_build_object('state', p_next_state, 'version', v_new_version), gen_random_uuid());
   insert into public.outbox_events (restaurant_id, branch_id, event_type, entity_type, entity_id, entity_version, payload)
   values (v_restaurant_id, v_branch_id, 'service_request.transitioned', 'service_request', p_request_id, v_new_version, jsonb_build_object('sessionId', v_session_id, 'state', p_next_state, 'version', v_new_version));

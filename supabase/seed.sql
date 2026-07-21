@@ -101,7 +101,7 @@ on conflict (session_id, code_hash) do nothing;
 
 -- Hidden local-only fixtures for authenticated staff command success/replay tests.
 insert into public.restaurant_tables (id, restaurant_id, branch_id, label, area, capacity, active)
-values ('00000000-0000-4000-8000-000000000604', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002', 'T98 synthetic ops', 'Local test fixture', 4, false)
+values ('00000000-0000-4000-8000-000000000604', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002', 'T98 synthetic ops', 'Local test fixture', 4, true)
 on conflict (id) do nothing;
 insert into public.dining_sessions (id, restaurant_id, branch_id, table_id, state, guest_count, business_date, total_due_minor, currency)
 values ('00000000-0000-4000-8000-000000000702', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000604', 'OPEN', 2, current_date, 0, 'MYR')

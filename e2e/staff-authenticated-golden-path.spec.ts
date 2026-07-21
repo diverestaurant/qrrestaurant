@@ -222,7 +222,7 @@ test("synthetic manager can operate the KDS, waiter and admin UI gates", async (
 
   await page.goto("/waiter");
   await expect(page.getByText(/Signed in as/)).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Open or rotate a table Session" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Open, hand off, or reset a table Session" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Build an order from the live menu" })).toBeVisible();
   const waiterAction = page.getByRole("button", { name: /Claim|Resolve/ }).first();
   await expect(waiterAction).toBeVisible();
@@ -257,7 +257,7 @@ test("Admin UI commits menu, table, QR, station and feature-flag operations", as
     await page.getByRole("button", { name: "Create category" }).click();
     await expect(page.getByRole("option", { name: categoryName })).toHaveCount(1);
 
-    await page.getByLabel("Category").selectOption({ label: categoryName });
+    await page.getByRole("combobox", { name: "Category", exact: true }).selectOption({ label: categoryName });
     await page.getByLabel("New item name").fill(itemName);
     const menuPanel = page.getByRole("heading", { name: "Menu and categories" }).locator("..");
     await menuPanel.getByLabel("Price (MYR)").first().fill("12.50");
@@ -265,13 +265,12 @@ test("Admin UI commits menu, table, QR, station and feature-flag operations", as
     await expect(page.locator(`input[value="${itemName}"]`)).toBeVisible();
 
     const tablesPanel = page.getByRole("heading", { name: "Tables and secure QR" }).locator("..");
-    await tablesPanel.getByLabel("Label").fill(tableLabel);
-    await tablesPanel.getByLabel("Area").fill("E2E floor");
-    await tablesPanel.getByLabel("Capacity").fill("3");
+    await tablesPanel.getByLabel("New table label").fill(tableLabel);
+    await tablesPanel.getByLabel("New table area").fill("E2E floor");
+    await tablesPanel.getByLabel("New table capacity").fill("3");
     await tablesPanel.getByRole("button", { name: "Create table" }).click();
-    const tableInput = page.locator(`input[value="${tableLabel}"]`);
-    await expect(tableInput).toBeVisible();
-    const tableRow = tableInput.locator("xpath=../../..");
+    const tableRow = page.getByRole("group", { name: `Table ${tableLabel}` });
+    await expect(tableRow).toBeVisible();
     await tableRow.getByRole("button", { name: "Rotate QR" }).click();
     await expect(page.getByText(new RegExp(`One-time QR entry for ${tableLabel}`))).toBeVisible();
 

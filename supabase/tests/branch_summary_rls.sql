@@ -34,7 +34,7 @@ set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-4000-8000-000000009901', 'role', 'authenticated', 'is_anonymous', false)::text, true);
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000009901', true);
 select is((select count(*)::integer from public.read_branch_summary('00000000-0000-4000-8000-000000000002'::uuid)), 1, 'manager can read one branch summary');
-select is((select active_tables::integer from public.read_branch_summary('00000000-0000-4000-8000-000000000002'::uuid)), 3, 'branch summary counts active tables');
+select is((select active_tables::integer from public.read_branch_summary('00000000-0000-4000-8000-000000000002'::uuid)), 4, 'branch summary counts active tables including the guarded staff-operations fixture');
 select is((select unavailable_menu_items::integer from public.read_branch_summary('00000000-0000-4000-8000-000000000002'::uuid)), 0, 'branch summary counts unavailable menu items');
 select is((select total_paid_minor::integer from public.read_branch_summary('00000000-0000-4000-8000-000000000002'::uuid)), 0, 'branch summary starts with no paid amount in the synthetic seed');
 

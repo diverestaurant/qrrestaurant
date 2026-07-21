@@ -30,6 +30,7 @@ test.describe("local M10 browser hardening", () => {
 
   test("critical role actions have accessible names and visible focus", async ({ page }) => {
     await page.goto("/order/demo");
+    await expect(page.getByRole("button", { name: "Join table" })).toBeEnabled();
     await page.getByLabel("Join Code").focus();
     await expect(page.getByLabel("Join Code")).toBeFocused();
     await expect(page.getByRole("button", { name: "Submit order" })).toBeVisible();

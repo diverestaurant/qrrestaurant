@@ -77,7 +77,7 @@ begin
   ) then raise exception 'Serve or resolve every active order item before requesting payment.' using errcode = 'P0001'; end if;
   v_new_version := v_version + 1;
   update public.dining_sessions s set state = 'PAYMENT_REQUESTED', version = v_new_version where s.id = p_session_id;
-  insert into public.audit_logs (restaurant_id, branch_id, actor_id, actor_type, action, entity_type, entity_id, reason, before_masked, after_masked, correlation_id)
+  insert into public.audit_logs (restaurant_id, branch_id, actor_id, actor_role, action, entity_type, entity_id, reason, before_masked, after_masked, correlation_id)
   values (v_restaurant_id, v_branch_id, auth.uid(), 'STAFF', 'session.payment_requested', 'dining_session', p_session_id, 'Waiter cashier handoff', jsonb_build_object('state', v_state, 'version', v_version), jsonb_build_object('state', 'PAYMENT_REQUESTED', 'version', v_new_version), gen_random_uuid());
   insert into public.outbox_events (restaurant_id, branch_id, event_type, entity_type, entity_id, entity_version, payload)
   values (v_restaurant_id, v_branch_id, 'session.payment_requested', 'dining_session', p_session_id, v_new_version, jsonb_build_object('sessionId', p_session_id, 'state', 'PAYMENT_REQUESTED', 'version', v_new_version));

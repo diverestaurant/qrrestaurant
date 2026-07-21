@@ -199,7 +199,7 @@ begin
     else
       delete from public.menu_item_modifier_groups where menu_item_id = v_menu_item_id and group_id = v_group_id and branch_id = p_branch_id;
     end if;
-    insert into public.audit_logs (restaurant_id, branch_id, actor_id, actor_type, action, entity_type, entity_id, reason, after_masked, correlation_id)
+    insert into public.audit_logs (restaurant_id, branch_id, actor_id, actor_role, action, entity_type, entity_id, reason, after_masked, correlation_id)
     values (p_restaurant_id, p_branch_id, auth.uid(), 'STAFF', 'menu_modifier_link.set', 'menu_item', v_menu_item_id, 'Authorized menu structure command', jsonb_build_object('groupId', v_group_id, 'enabled', v_enabled), gen_random_uuid());
     insert into public.outbox_events (restaurant_id, branch_id, event_type, entity_type, entity_id, entity_version, payload)
     values (p_restaurant_id, p_branch_id, 'menu_modifier_link.set', 'menu_item', v_menu_item_id, v_version, jsonb_build_object('groupId', v_group_id, 'enabled', v_enabled, 'version', v_version));

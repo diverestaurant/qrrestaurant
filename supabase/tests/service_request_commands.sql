@@ -70,8 +70,8 @@ select is((select count(*)::integer from public.outbox_events where entity_id = 
 select is((select version from public.service_requests where id = '00000000-0000-4000-8000-000000009957'), 3, 'request version advances exactly once per transition');
 select is((select state from public.service_requests where id = '00000000-0000-4000-8000-000000009957'), 'RESOLVED', 'authoritative request state remains resolved');
 select is((select count(*)::integer from public.service_requests where id in ('00000000-0000-4000-8000-000000009958','00000000-0000-4000-8000-000000009959')), 0, 'rejected and deduplicated commands create no extra rows');
-select is((select actor_type from public.audit_logs where entity_id = '00000000-0000-4000-8000-000000009957' and action = 'service_request.created'), 'CUSTOMER', 'customer attribution is preserved');
-select is((select actor_type from public.audit_logs where entity_id = '00000000-0000-4000-8000-000000009957' and action = 'service_request.transitioned' order by created_at limit 1), 'STAFF', 'staff transition attribution is preserved');
+select is((select actor_role from public.audit_logs where entity_id = '00000000-0000-4000-8000-000000009957' and action = 'service_request.created'), 'CUSTOMER', 'customer attribution is preserved');
+select is((select actor_role from public.audit_logs where entity_id = '00000000-0000-4000-8000-000000009957' and action = 'service_request.transitioned' order by created_at limit 1), 'STAFF', 'staff transition attribution is preserved');
 select ok((select count(*) = 0 from public.service_requests where branch_id <> '00000000-0000-4000-8000-000000000002'), 'request commands created no cross-tenant data');
 select is((select priority from public.service_requests where id = '00000000-0000-4000-8000-000000009957'), 1::smallint, 'water request receives the deterministic normal priority');
 

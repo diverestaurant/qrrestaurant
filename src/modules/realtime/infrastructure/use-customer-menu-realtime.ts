@@ -64,7 +64,7 @@ export function useCustomerMenuRealtime({ restaurantId, branchId, onResync }: Pr
         const reconnected = connectedOnce;
         connectedOnce = true;
         setState({ status: "connected", lastReason: reconnected ? "channel reconnected" : "channel subscribed" });
-        authoritativeResync(reconnected ? "channel reconnected" : "channel subscribed");
+        if (reconnected) authoritativeResync("channel reconnected");
       } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
         setState({ status: "reconnecting", lastReason: `channel ${status.toLowerCase()}` });
         authoritativeResync(`channel ${status.toLowerCase()}`);

@@ -34,6 +34,7 @@ test("staff role pages do not disclose repository snapshots before sign-in", asy
 test("customer join boundary is keyboard addressable without mobile overflow", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/order/demo");
+  await expect(page.getByRole("button", { name: "Join table" })).toBeEnabled();
   const joinCode = page.getByLabel("Join Code");
   await joinCode.focus();
   await expect(joinCode).toBeFocused();

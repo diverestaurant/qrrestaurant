@@ -116,7 +116,7 @@ test("customer Realtime notification triggers an authoritative resync", async ({
   const beforeCount = Number(beforeText?.match(/(\d+) request/)?.[1] ?? 0);
 
   const result = await page.evaluate(async ({ sessionId, idempotencyKey }) => {
-    const response = await fetch("/api/v1/customer/service-requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId, requestType: "WATER", note: "Realtime resync smoke", idempotencyKey }) });
+    const response = await fetch("/api/v1/customer/service-requests", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sessionId, requestType: "OTHER", note: "Realtime resync smoke", idempotencyKey }) });
     return { status: response.status, body: await response.json() };
   }, { sessionId, idempotencyKey: randomUUID() });
   expect(result.status).toBe(200);
