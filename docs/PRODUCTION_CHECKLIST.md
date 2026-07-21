@@ -83,4 +83,4 @@ Last updated: 2026-07-21
 
 No item becomes complete merely because the project is in BUILD. Each checkbox must link implementation, local/staging or production evidence before it changes.
 
-Current local evidence for the security/build rows is recorded in `TEST_REPORT.md`: 72 unit tests, 508 pgTAP assertions, 83 browser checks, local DB lint, production build/runtime nonce CSP, upload signature/dimension rejection and zero high/critical dependency findings. Checkboxes remain open until their required Staging/Production scope is verified.
+Current local evidence for the security/build rows is recorded in `TEST_REPORT.md`: 73 unit tests, 508 pgTAP assertions, 85 browser checks, local DB lint, production build/runtime nonce CSP, bounded readiness, redacted logs, upload signature/dimension rejection and zero high/critical dependency findings. Checkboxes remain open until their required Staging/Production scope is verified.

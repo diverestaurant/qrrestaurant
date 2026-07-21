@@ -12,10 +12,11 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 
 - Local database reset applies 32 migrations through `20260721155000_staff_self_profile.sql`.
 - pgTAP: 31 SQL files / 508 assertions pass.
-- Vitest: 24 files / 72 tests pass.
-- Playwright: 110 total, 83 pass / 27 expected role-project skips / 0 failures from a fresh local reset.
+- Vitest: 25 files / 73 tests pass.
+- Playwright: 112 total, 85 pass / 27 expected role-project skips / 0 failures from a fresh local reset.
 - Lint, strict typecheck, local Supabase database lint and `next build --webpack` pass.
 - Production runtime CSP uses per-request nonces: all 17 rendered nonce tags matched the response nonce, production `script-src` omitted `unsafe-inline`, and `x-powered-by` was absent.
+- Liveness plus dependency readiness (`application` + Supabase Data API/DB/RLS) return no-store, correlation-scoped responses; logger fields are automatically redacted for common secrets and PII.
 - Dependency gate: zero high/critical findings; two evaluated moderate Next.js-vendored PostCSS findings remain without a safe non-breaking package fix.
 - Independent UI/UX Design Subagent review is complete; latest GREEN/YELLOW work stayed within the approved Master Plan architecture.
 

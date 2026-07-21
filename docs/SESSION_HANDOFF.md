@@ -12,8 +12,8 @@ Step 5/7 is complete locally. Resume at step 6/7: checkpoint the current fully p
 
 - 32 migrations through `20260721155000_staff_self_profile.sql` reset cleanly.
 - 31 pgTAP files / 508 assertions pass.
-- 24 Vitest files / 72 tests pass.
-- Fresh full Playwright matrix: 110 total, 83 passed / 27 expected cross-project skips / 0 failures.
+- 25 Vitest files / 73 tests pass.
+- Fresh full Playwright matrix: 112 total, 85 passed / 27 expected cross-project skips / 0 failures.
 - Lint, strict typecheck, local Supabase DB lint and Next.js 16.2.10 Webpack production build pass.
 - Production runtime CSP smoke: response nonce present; 17/17 rendered nonce tags matched; no script `unsafe-inline`; no `x-powered-by`.
 - `npm audit --audit-level=high`: zero high/critical; two evaluated moderate Next.js-vendored build-time PostCSS findings.
@@ -29,6 +29,7 @@ Step 5/7 is complete locally. Resume at step 6/7: checkpoint the current fully p
 - Hydration contrast defect fixed; targeted axe 10/10 and fresh full matrix pass.
 - UI-to-Storage architecture violation removed. Server-scoped image intent plus post-upload byte/signature/4096px verification now gates image metadata; disguised PNG rejection passes E2E.
 - `db:test:fresh` and `test:e2e:fresh` isolate stateful suites with explicit local-only resets.
+- Health separates liveness from a bounded Supabase readiness probe and returns correlation-scoped no-store responses; logger sensitive-key redaction has unit coverage.
 
 All prior Customer, KDS, Waiter, Cashier, Admin, pricing, multi-tender, receipt, close, report, Realtime, offline, Storage and tenant-isolation slices remain implemented and covered by the current matrix.
 

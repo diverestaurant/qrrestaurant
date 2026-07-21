@@ -7,11 +7,12 @@ All notable project changes are recorded here. This file does not prove implemen
 ### Added
 
 - Owner Branch lifecycle, printable Table Entry QR/immutable receipt, English-first i18n/pseudo-long architecture and staff self-profile/RLS.
-- Complete local automated matrix: 72 unit tests, 508 pgTAP assertions and 83 passing Playwright checks with zero failures.
+- Complete local automated matrix: 73 unit tests, 508 pgTAP assertions and 85 passing Playwright checks with zero failures.
 - Local-only Supabase readiness gate and hydration-transition contrast regression coverage.
 - Current migration-155 portable schema restore: 33 public tables, 57 policies, 33 RLS-enabled tables, zero RLS gaps and safe definer `search_path` checks.
 - Per-request production nonce CSP/security headers and private menu-image intent/verification boundary, including rejection and cleanup of a script payload disguised as PNG.
 - Explicit fresh-state commands for local pgTAP and Playwright suites so stateful evidence cannot contaminate later assertions.
+- Correlation-scoped application liveness/Supabase readiness plus privacy-safe structured logger redaction.
 
 ### Scope boundary
 

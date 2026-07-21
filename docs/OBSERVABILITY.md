@@ -1,6 +1,6 @@
 # Observability and Incident Operations Plan
 
-Status: Local structured logger and recovery signals implemented; hosted observability is not configured  
+Status: Local redacted structured logger, liveness/readiness and recovery signals implemented; hosted observability is not configured
 Last updated: 2026-07-21
 
 ## 1. Goals
@@ -116,4 +116,4 @@ External observability provider selection may cost money and requires approval. 
 
 Log/trace retention, IP/User Agent masking and access require privacy/security approval. Production access is least privilege and audited. Lower environments contain synthetic data.
 
-Structured local logging exists, and the role recovery layer exposes reachability/reconnect signals. Metrics, dashboards, alerts, runbook automation and hosted observability are not configured.
+Structured local logging now adds environment/release/correlation context and redacts common secret, token, credential, email, note and payment-reference keys. `/api/health` provides cheap liveness plus an explicit bounded Supabase Data API/DB/RLS readiness check without leaking provider errors. The role recovery layer exposes reachability/reconnect signals. Metrics export, dashboards, alert delivery, runbook automation, hosted retention and named escalation owners are not configured; those require the authorized Staging/provider and owner inputs.

@@ -10,15 +10,15 @@ Current result: M0–M9 **TESTED LOCALLY**; M10 automated scope **TESTED LOCALLY
 |---|---|---|
 | Lint | PASS | `eslint .` |
 | TypeScript | PASS | strict `tsc --noEmit` |
-| Unit/domain | PASS | 24 Vitest files / 72 tests |
+| Unit/domain | PASS | 25 Vitest files / 73 tests |
 | Database | PASS | clean reset through migration `20260721155000`; 31 pgTAP files / 508 assertions |
 | Database lint | PASS | local `public,app_private`: no schema errors |
-| Browser/E2E | PASS | fresh local reset, 110 total: 83 passed / 27 expected cross-project skips / 0 failed |
+| Browser/E2E | PASS | fresh local reset, 112 total: 85 passed / 27 expected cross-project skips / 0 failed |
 | Production compile | PASS | Next.js 16.2.10 `next build --webpack`; all application pages dynamic for nonce CSP; only framework not-found output remains static |
 | Production runtime security | PASS locally | CSP nonce present; 17/17 rendered nonce tags matched; production script policy has no `unsafe-inline`; no `x-powered-by` |
 | Dependency high/critical gate | PASS | `npm audit --audit-level=high`: 0 high, 0 critical; 2 moderate build-time PostCSS findings |
 
-The browser matrix covers customer join/order/replay/tracking/service requests and scoped Realtime resync; repository-backed KDS/Waiter/Cashier/Admin; role and unauthenticated boundaries; Branch/Platform lifecycle; settings/Profile/i18n; discount/multi-tender/receipt/close/reconciliation; QR and receipt print; strict security headers; WCAG axe scans; keyboard focus; 320px overflow; offline/reconnect; a 30-request read burst; private image upload plus MIME-disguise rejection; and synthetic Storage backup/restore.
+The browser matrix covers customer join/order/replay/tracking/service requests and scoped Realtime resync; repository-backed KDS/Waiter/Cashier/Admin; role and unauthenticated boundaries; Branch/Platform lifecycle; settings/Profile/i18n; discount/multi-tender/receipt/close/reconciliation; QR and receipt print; liveness/readiness, strict security headers; WCAG axe scans; keyboard focus; 320px overflow; offline/reconnect; a 30-request read burst; private image upload plus MIME-disguise rejection; and synthetic Storage backup/restore.
 
 ## Regression findings closed in this checkpoint
 
@@ -33,6 +33,7 @@ The browser matrix covers customer join/order/replay/tracking/service requests a
 - Profile migration 155 enables RLS, grants authenticated users self-read only, revokes raw writes, validates active permanent staff scope in a narrow guarded function, uses optimistic versioning, and omits display names from audit/outbox payloads.
 - Full pgTAP coverage includes explicit grants, RLS/cross-tenant isolation, anonymous-vs-staff boundaries, QR/Join Code grants, menu/pricing snapshots, state/version conflicts, payments/receipts/close, settings/reports, Branch/Platform lifecycle, Realtime publication, Storage and concurrency.
 - Next.js Proxy generates a fresh CSP nonce for every HTML request; authorization remains inside pages/routes/RLS and never relies on Proxy.
+- `/api/health` keeps application liveness cheap; `?check=readiness` uses a 1.2-second bounded public-key query through Data API/DB/RLS, returns 503 without provider internals on failure, and emits an opaque correlation ID. Logger redaction is unit-tested.
 - App-owned migration/reset and pgTAP pass. Supabase-managed extension warnings are not counted as app defects.
 
 ## Dependency advisory assessment

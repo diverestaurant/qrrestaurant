@@ -52,6 +52,17 @@ test.describe("local M10 browser hardening", () => {
     expect(elapsedMs).toBeLessThan(3000);
   });
 
+  test("readiness reports the application and local database without exposing internals", async ({ request }) => {
+    const response = await request.get("/api/health?check=readiness");
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["cache-control"]).toBe("no-store");
+    expect(response.headers()["x-correlation-id"]).toMatch(/[0-9a-f-]{36}/);
+    const body = await response.json();
+    expect(body).toMatchObject({ ok: true, service: "dive-restaurant", mode: "local", checks: { application: "ok", database: "ok" } });
+    expect(body.durationMs).toBeLessThan(1200);
+    expect(JSON.stringify(body)).not.toMatch(/password|service.?role|authorization|postgres:/i);
+  });
+
   test("application responses carry the reviewed browser security headers", async ({ request }) => {
     const response = await request.get("/");
     expect(response.ok()).toBe(true);
