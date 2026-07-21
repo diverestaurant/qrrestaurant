@@ -16,6 +16,7 @@ Step 5/7 is complete locally. Resume at step 6/7: checkpoint the current fully p
 - Full Playwright matrix: 108 total, 81 passed / 27 expected cross-project skips / 0 failures.
 - Lint, strict typecheck and Next.js 16.2.10 Webpack production build pass.
 - `npm audit --audit-level=high`: zero high/critical; two evaluated moderate Next.js-vendored build-time PostCSS findings.
+- Current isolated schema restore: 33 public tables, 57 policies, 33 RLS tables, zero RLS gaps, 43 definer functions and zero missing explicit `search_path`; temporary database removed.
 
 ## Latest implemented work
 
@@ -40,7 +41,7 @@ All prior Customer, KDS, Waiter, Cashier, Admin, pricing, multi-tender, receipt,
 
 1. Safe Git checkpoint of current source/tests/docs.
 2. Present pending migration order and risk summary.
-3. Linked Staging migration dry-run; apply only reviewed migrations; no seed overwrite/reset/delete.
+3. Obtain a refreshed explicit Staging authorization because the remote tool reviewer rejected the first dry-run using a stale `EXTERNAL_SCOPE=NONE` snapshot; then run linked dry-run and apply only reviewed migrations with no seed overwrite/reset/delete.
 4. Verify remote migration history, all exposed tables RLS, grants, tenant isolation, Realtime publication and integrity.
 5. Deploy current app only as Vercel Preview; verify `inspect.target=preview` and hosted Golden Path.
 6. Continue M10/M11 manual accessibility/device/usability, hosted backup/restore/observability and owner-input gates.

@@ -40,6 +40,12 @@ The browser matrix covers customer join/order/replay/tracking/service requests a
 - Vercel retains the explicitly authorized inert bootstrap and an earlier real Preview that was `READY` with `inspect.target=preview`.
 - This hosted evidence predates migrations `20260721140000`–`20260721155000` and the newest application slices; it is not current Finish Line evidence.
 
+## Current local restore evidence
+
+- A schema-only dump of `public`, `app_private` and local `auth` restored into an isolated temporary database after removing provider-specific ownership/default-privilege statements.
+- Verification found 33 public tables, 57 public policies, 33 RLS-enabled tables, zero public tables without RLS, 43 `SECURITY DEFINER` functions and zero such functions without explicit `search_path`; the temporary database was then removed.
+- The browser Storage drill separately verifies synthetic object copy/restore and byte equality. This is not hosted provider backup evidence.
+
 ## Remaining evidence
 
 - Reviewed push and verification of the 16 pending migrations on the named Staging project.

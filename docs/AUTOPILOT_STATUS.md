@@ -22,7 +22,7 @@ Step 5/7 is complete locally and step 6/7 is in progress. The complete current l
 | M8 | Complete locally | Tested Locally | discounts, multi-tender manual payment, receipts/reprint, close and reconciliation |
 | M9 | Complete locally | Tested Locally | full V1 Admin, Branch/Platform lifecycle, reports, audit viewer, flags, print and English-first i18n architecture |
 | M10 | In progress | Tested Locally (automated scope) | full automated matrix passes; manual screen-reader/device/usability and final independent review evidence remain |
-| M11 | In progress | Implemented / Tested Locally | local restore and runbook foundations exist; newest Staging migrations, fresh Preview, hosted restore/operations and owner inputs remain |
+| M11 | In progress | Tested Locally (restore scope) | current 33-table/57-policy schema restore and synthetic Storage byte-compare pass; newest Staging migrations, fresh Preview, hosted operations and owner inputs remain |
 | M12 | Not authorized | Designed | Production and Pilot require separate RELEASE/PILOT authorization |
 
 ## Latest completed slices

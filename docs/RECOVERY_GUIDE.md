@@ -27,7 +27,7 @@ Last updated: 2026-07-21
 
 ## Local BUILD rehearsal evidence
 
-The local schema-only restore rehearsal succeeded in an isolated temporary database after including `public`, `app_private` and local `auth` schemas and omitting ownership/privilege statements. It verified 28 public tables, 50 public policies and 28 RLS-enabled public tables, then removed the temporary database. Hosted data, Storage, Auth retention, backups, monitoring and Golden Path recovery remain unverified.
+The current schema-only restore rehearsal succeeded in an isolated temporary database after including `public`, `app_private` and local `auth` schemas and omitting provider ownership/default-privilege statements. It verified 33 public tables, 57 public policies, 33 RLS-enabled public tables, zero public tables without RLS, 43 `SECURITY DEFINER` functions and zero definer functions without explicit `search_path`, then removed the temporary database. The separate local synthetic Storage object copy/restore/byte-comparison also passes. Hosted data, complete Storage/Auth retention, provider backups, monitoring and Golden Path recovery remain unverified.
 
 ## Financial recovery rule
 

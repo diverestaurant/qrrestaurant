@@ -1,8 +1,8 @@
 # Project Index
 
-Last updated: 2026-07-21  
-Current mode: `BUILD` (local-only)  
-Implementation status: M0–M2 foundation, M3 Session adapters, M4 menu, M5–M8 command routes, M9 report boundary and M10 hardening slices implemented/tested locally; full product matrix remains in progress
+Last updated: 2026-07-21
+Current mode: `BUILD` plus authorized named Staging Supabase/Vercel Preview work
+Implementation status: M0–M9 complete locally; M10 automated matrix passes; M10 manual and M11 Staging/operations remain in progress
 
 ## Start here
 
@@ -76,4 +76,4 @@ Implementation status: M0–M2 foundation, M3 Session adapters, M4 menu, M5–M8
 
 ## Current repository fact
 
-As of 2026-07-21, local BUILD has created a pinned Next.js/TypeScript application, local Supabase configuration and migrations, RLS/storage policies, unit tests, Playwright hardening coverage and an isolated schema restore rehearsal. The named Staging Supabase schema/RLS was verified; authorized Vercel Staging identity/team discovery was attempted but the requested team was not visible, so no Vercel project was configured or deployed. See [`TEST_REPORT.md`](TEST_REPORT.md) and [`SESSION_HANDOFF.md`](SESSION_HANDOFF.md) for evidence and remaining work.
+As of 2026-07-21, local BUILD has a fully passing M0–M9 automated matrix: 32 migrations, 508 pgTAP assertions, 68 unit tests, 81 passing browser checks and a current isolated schema/Storage restore rehearsal. The named Staging Supabase project has the first 16 reviewed migrations; the 16 newest migrations await dry-run/push because the current remote tool approval still references a stale `EXTERNAL_SCOPE=NONE` snapshot. Vercel retains the authorized inert bootstrap and an earlier inspect-confirmed real Preview that predates current code. See [`TEST_REPORT.md`](TEST_REPORT.md) and [`SESSION_HANDOFF.md`](SESSION_HANDOFF.md).

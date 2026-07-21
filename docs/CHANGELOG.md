@@ -2,6 +2,19 @@
 
 All notable project changes are recorded here. This file does not prove implementation status.
 
+## 2026-07-21 — M3–M10 local completion checkpoint
+
+### Added
+
+- Owner Branch lifecycle, printable Table Entry QR/immutable receipt, English-first i18n/pseudo-long architecture and staff self-profile/RLS.
+- Complete local automated matrix: 68 unit tests, 508 pgTAP assertions and 81 passing Playwright checks with zero failures.
+- Local-only Supabase readiness gate and hydration-transition contrast regression coverage.
+- Current migration-155 portable schema restore: 33 public tables, 57 policies, 33 RLS-enabled tables, zero RLS gaps and safe definer `search_path` checks.
+
+### Scope boundary
+
+- The newest 16 migrations and current app have not yet been verified in Staging. Real app Production deployment remains prohibited.
+
 ## 2026-07-21 — BUILD local hardening
 
 ### Added

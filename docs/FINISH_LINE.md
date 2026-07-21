@@ -18,7 +18,7 @@ The complete local automated matrix passes, but the newest Staging migration/Pre
 | Full automated quality matrix | PASS | lint/typecheck, 68 unit, 508 DB, 81 browser, build, high/critical audit gates | CI/hosted repeat as applicable |
 | No P0/P1 defects | IN PROGRESS | no open automated P0/P1 found; contrast/startup flakes fixed and regressed | manual/final defect audit |
 | Performance/load | IN PROGRESS | local latency and 30-request burst pass | agreed Pilot model, real device/Wi-Fi targets |
-| Backup/restore/operations | IN PROGRESS | local schema and synthetic Storage restore foundations | current restore rerun plus hosted/provider drill, alerts and owners |
+| Backup/restore/operations | IN PROGRESS | current local restore: 33 tables/57 policies/33 RLS/0 gaps plus synthetic Storage byte-compare | hosted/provider drill, alerts and owners |
 | Guides/handover | PASS for current local checkpoint | current task/status/test/handoff updated to source evidence | update after Staging rehearsal |
 | Release/client inputs | IN PROGRESS | inputs tracked in `CLIENT_INPUT_REQUIRED.md` | legal/financial/privacy/MFA/RPO-RTO/support approvals |
 

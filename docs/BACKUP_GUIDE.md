@@ -32,9 +32,9 @@ A complete backup plan covers:
 ## Local BUILD evidence
 
 - A portable schema-only dump of `public`, `app_private` and local `auth` was restored into an isolated temporary local PostgreSQL database.
-- Restore verification found 28 public tables, 50 public policies and 28 RLS-enabled public tables; the temporary database was removed after verification.
-- A local synthetic Storage lifecycle smoke uploaded, downloaded and removed one branch-scoped `menu-images` object under staff policy; no object backup/restore was performed.
+- The current migration-155 rehearsal verified 33 public tables, 57 public policies, 33 RLS-enabled public tables, zero public tables without RLS, 43 `SECURITY DEFINER` functions and zero definer functions without an explicit `search_path`; the temporary database was removed after verification.
+- A local synthetic Storage drill uploads and downloads one branch-scoped `menu-images` object, copies it to a backup key, restores/downloads the copy, byte-compares it and removes both objects.
 - A `public`-only dump is insufficient because the app-owned RLS helper schema is `app_private`; the portable rehearsal omits owner and privilege statements so it does not depend on protected Supabase role membership.
-- This is schema-only local evidence. It does not verify hosted PITR, encrypted backup retention, Storage objects, Auth data retention, RPO/RTO or a production Golden Path.
+- This remains local synthetic evidence. It does not verify hosted PITR, encrypted backup retention, complete hosted Storage/Auth data recovery, approved RPO/RTO or a production Golden Path.
 
 Exact commands/provider settings must be added only after environment selection and tested in authorized Staging.
