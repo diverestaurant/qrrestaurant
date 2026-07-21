@@ -1,0 +1,24 @@
+import { z } from "zod";
+
+const base = { restaurantId: z.uuid(), branchId: z.uuid(), idempotencyKey: z.uuid() };
+
+export const adminCommandSchema = z.discriminatedUnion("type", [
+  z.object({ ...base, type: z.literal("menu_category.create"), name: z.string().trim().min(1).max(120), description: z.string().trim().max(240).optional() }),
+  z.object({ ...base, type: z.literal("menu_category.update"), categoryId: z.uuid(), expectedVersion: z.int().positive(), name: z.string().trim().min(1).max(120), description: z.string().trim().max(240).optional(), sortOrder: z.int().min(0).max(10000), visible: z.boolean() }),
+  z.object({ ...base, type: z.literal("menu_item.create"), categoryId: z.uuid(), name: z.string().trim().min(1).max(160), description: z.string().trim().max(500).optional(), basePriceMinor: z.int().nonnegative(), currency: z.string().length(3), stationKey: z.string().trim().max(80).optional() }),
+  z.object({ ...base, type: z.literal("menu_item.update"), menuItemId: z.uuid(), expectedVersion: z.int().positive(), name: z.string().trim().min(1).max(160), description: z.string().trim().max(500).optional(), basePriceMinor: z.int().nonnegative(), stationKey: z.string().trim().max(80).optional(), visible: z.boolean() }),
+  z.object({ ...base, type: z.literal("menu_item.configuration.update"), menuItemId: z.uuid(), expectedVersion: z.int().positive(), name: z.string().trim().min(1).max(160), description: z.string().trim().max(500).optional(), basePriceMinor: z.int().nonnegative(), stationKey: z.string().trim().max(80).optional(), visible: z.boolean(), sortOrder: z.int().min(0).max(10000), featured: z.boolean(), spiceLevel: z.int().min(0).max(3), taxEligible: z.boolean(), serviceEligible: z.boolean(), operatingRules: z.record(z.string(), z.unknown()).default({}) }),
+  z.object({ ...base, type: z.literal("menu_item.image.set"), menuItemId: z.uuid(), expectedVersion: z.int().positive(), imagePath: z.string().min(10).max(500), imageAlt: z.string().trim().min(1).max(180) }),
+  z.object({ ...base, type: z.literal("menu_variant.upsert"), variantId: z.uuid().optional(), expectedVersion: z.int().positive().optional(), menuItemId: z.uuid(), name: z.string().trim().min(1).max(120), priceDeltaMinor: z.int().nonnegative().max(100_000_000), active: z.boolean(), sortOrder: z.int().min(0).max(10000) }),
+  z.object({ ...base, type: z.literal("menu_modifier_group.upsert"), groupId: z.uuid().optional(), expectedVersion: z.int().positive().optional(), name: z.string().trim().min(1).max(120), required: z.boolean(), minSelections: z.int().min(0).max(20), maxSelections: z.int().min(0).max(20), active: z.boolean() }).refine((value) => value.maxSelections >= value.minSelections && (!value.required || value.minSelections > 0), { message: "Modifier selection bounds are invalid." }),
+  z.object({ ...base, type: z.literal("menu_modifier_option.upsert"), optionId: z.uuid().optional(), expectedVersion: z.int().positive().optional(), groupId: z.uuid(), name: z.string().trim().min(1).max(120), priceDeltaMinor: z.int().nonnegative().max(100_000_000), active: z.boolean(), sortOrder: z.int().min(0).max(10000) }),
+  z.object({ ...base, type: z.literal("menu_modifier_link.set"), menuItemId: z.uuid(), expectedMenuItemVersion: z.int().positive(), groupId: z.uuid(), enabled: z.boolean(), sortOrder: z.int().min(0).max(10000) }),
+  z.object({ ...base, type: z.literal("table.create"), label: z.string().trim().min(1).max(40), area: z.string().trim().max(80).optional(), capacity: z.int().min(1).max(100) }),
+  z.object({ ...base, type: z.literal("table.update"), tableId: z.uuid(), expectedVersion: z.int().positive(), label: z.string().trim().min(1).max(40), area: z.string().trim().max(80).optional(), capacity: z.int().min(1).max(100), active: z.boolean() }),
+  z.object({ ...base, type: z.literal("table.qr.rotate"), tableId: z.uuid() }),
+  z.object({ ...base, type: z.literal("membership.update"), membershipId: z.uuid(), expectedVersion: z.int().positive(), roleId: z.uuid(), status: z.enum(["ACTIVE", "SUSPENDED", "REVOKED"]) }),
+  z.object({ ...base, type: z.literal("station.upsert"), stationId: z.uuid().optional(), expectedVersion: z.int().positive().optional(), stationKey: z.string().trim().regex(/^[a-z][a-z0-9_-]{1,39}$/), name: z.string().trim().min(1).max(120), active: z.boolean() }),
+  z.object({ ...base, type: z.literal("feature_flag.set"), flagKey: z.string().trim().regex(/^[a-z][a-z0-9_.-]{1,79}$/), description: z.string().trim().max(240).optional(), enabled: z.boolean(), expectedVersion: z.int().positive().optional() }),
+]);
+
+export type AdminCommand = z.infer<typeof adminCommandSchema>;

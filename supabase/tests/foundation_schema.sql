@@ -1,0 +1,18 @@
+begin;
+select plan(14);
+select has_table('public', 'restaurants', 'restaurants table exists');
+select has_table('public', 'dining_sessions', 'dining_sessions table exists');
+select has_table('public', 'orders', 'orders table exists');
+select has_table('public', 'payments', 'payments table exists');
+select has_column('public', 'orders', 'idempotency_key', 'orders retain idempotency key');
+select has_column('public', 'payments', 'amount_minor', 'payments use minor units');
+select ok(to_regclass('public.one_active_session_per_table') is not null, 'one active session index exists');
+select ok(to_regclass('public.one_current_table_qr') is not null, 'one current QR index exists');
+select ok((select c.relrowsecurity from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relname = 'restaurants'), 'restaurants RLS enabled');
+select ok((select c.relrowsecurity from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relname = 'dining_sessions'), 'sessions RLS enabled');
+select ok((select c.relrowsecurity from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relname = 'orders'), 'orders RLS enabled');
+select ok((select c.relrowsecurity from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relname = 'payments'), 'payments RLS enabled');
+select ok(not exists (select 1 from pg_policies where schemaname = 'public' and policyname in ('role_catalog_staff_select', 'permission_catalog_staff_select', 'role_permissions_staff_select') and coalesce(qual, '') = 'true'), 'staff catalog policies are not universally permissive');
+select ok(exists (select 1 from pg_policies where schemaname = 'public' and policyname = 'grant_customer_select' and qual like '%is_anonymous_claim%'), 'customer grants distinguish anonymous claims');
+select * from finish();
+rollback;

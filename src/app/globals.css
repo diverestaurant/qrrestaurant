@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f8f5;
+  --foreground: #17211b;
+  --surface: #ffffff;
+  --muted: #66736a;
+  --line: #dce4dd;
+  --brand: #0f766e;
+  --brand-strong: #115e59;
+  --brand-soft: #d7f1ec;
+  --danger: #b42318;
+  --warning: #a15c07;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+}
+
+* { border-color: var(--line); }
+
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 70%, white); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+html[data-kds-density="compact"] [data-kds-ticket] { padding: 1rem; }
+html[data-kds-density="compact"] [data-kds-ticket] [data-kds-secondary] { margin-top: 0.5rem; }

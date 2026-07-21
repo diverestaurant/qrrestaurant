@@ -1,0 +1,45 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "db:init": "SUPABASE_TELEMETRY_DISABLED=1 supabase init",
+    "db:start": "SUPABASE_TELEMETRY_DISABLED=1 supabase start",
+    "db:stop": "SUPABASE_TELEMETRY_DISABLED=1 supabase stop",
+    "db:reset": "SUPABASE_TELEMETRY_DISABLED=1 supabase db reset",
+    "db:test": "SUPABASE_TELEMETRY_DISABLED=1 supabase test db"
+  },
+  "dependencies": {
+    "next": "16.2.10",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "@supabase/ssr": "0.12.3",
+    "@supabase/supabase-js": "2.110.7",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "@tailwindcss/postcss": "4.3.3",
+    "axe-core": "4.12.1",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.1",
+    "eslint-config-next": "16.2.10",
+    "prettier": "3.9.5",
+    "prettier-plugin-tailwindcss": "0.8.1",
+    "supabase": "2.109.1",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}
