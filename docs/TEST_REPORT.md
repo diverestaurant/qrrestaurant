@@ -10,24 +10,29 @@ Current result: M0–M9 **TESTED LOCALLY**; M10 automated scope **TESTED LOCALLY
 |---|---|---|
 | Lint | PASS | `eslint .` |
 | TypeScript | PASS | strict `tsc --noEmit` |
-| Unit/domain | PASS | 23 Vitest files / 68 tests |
+| Unit/domain | PASS | 24 Vitest files / 72 tests |
 | Database | PASS | clean reset through migration `20260721155000`; 31 pgTAP files / 508 assertions |
-| Browser/E2E | PASS | 108 total: 81 passed / 27 expected cross-project skips / 0 failed |
-| Production compile | PASS | Next.js 16.2.10 `next build --webpack`; 17 static pages generated and all current dynamic routes compiled |
+| Database lint | PASS | local `public,app_private`: no schema errors |
+| Browser/E2E | PASS | fresh local reset, 110 total: 83 passed / 27 expected cross-project skips / 0 failed |
+| Production compile | PASS | Next.js 16.2.10 `next build --webpack`; all application pages dynamic for nonce CSP; only framework not-found output remains static |
+| Production runtime security | PASS locally | CSP nonce present; 17/17 rendered nonce tags matched; production script policy has no `unsafe-inline`; no `x-powered-by` |
 | Dependency high/critical gate | PASS | `npm audit --audit-level=high`: 0 high, 0 critical; 2 moderate build-time PostCSS findings |
 
-The browser matrix covers customer join/order/replay/tracking/service requests and scoped Realtime resync; repository-backed KDS/Waiter/Cashier/Admin; role and unauthenticated boundaries; Branch/Platform lifecycle; settings/Profile/i18n; discount/multi-tender/receipt/close/reconciliation; QR and receipt print; WCAG axe scans; keyboard focus; 320px overflow; offline/reconnect; a 30-request read burst; and synthetic Storage backup/restore.
+The browser matrix covers customer join/order/replay/tracking/service requests and scoped Realtime resync; repository-backed KDS/Waiter/Cashier/Admin; role and unauthenticated boundaries; Branch/Platform lifecycle; settings/Profile/i18n; discount/multi-tender/receipt/close/reconciliation; QR and receipt print; strict security headers; WCAG axe scans; keyboard focus; 320px overflow; offline/reconnect; a 30-request read burst; private image upload plus MIME-disguise rejection; and synthetic Storage backup/restore.
 
 ## Regression findings closed in this checkpoint
 
 - Axe intermittently observed the Customer Join button while its hydration-driven disabled-to-enabled color transition was mid-animation (`2.89:1`). Removing that color transition made the enabled state immediately compliant. Repeated targeted verification passed 10/10 and the fresh full matrix passed.
 - Fresh Supabase reset could return before Auth/PostgREST were application-ready. `pretest:e2e` now runs a localhost-only readiness gate; it rejects remote URLs and waits for both local Auth health and an authenticated REST read before Playwright starts.
+- Stateful pgTAP and Playwright suites both assume the clean seed. `db:test:fresh` and `test:e2e:fresh` now perform an explicit `--local` reset before each suite, preventing legitimate browser mutations from contaminating database count/version assertions.
+- Admin image upload previously imported the browser Supabase client directly. It now uses the typed HTTP boundary; signed private upload is followed by server-side byte count, raster signature and maximum-dimension verification. A script payload disguised as PNG is rejected and removed in E2E.
 
 ## Database/security evidence
 
 - All 32 migrations are additive; the current reset does not require destructive data operations.
 - Profile migration 155 enables RLS, grants authenticated users self-read only, revokes raw writes, validates active permanent staff scope in a narrow guarded function, uses optimistic versioning, and omits display names from audit/outbox payloads.
 - Full pgTAP coverage includes explicit grants, RLS/cross-tenant isolation, anonymous-vs-staff boundaries, QR/Join Code grants, menu/pricing snapshots, state/version conflicts, payments/receipts/close, settings/reports, Branch/Platform lifecycle, Realtime publication, Storage and concurrency.
+- Next.js Proxy generates a fresh CSP nonce for every HTML request; authorization remains inside pages/routes/RLS and never relies on Proxy.
 - App-owned migration/reset and pgTAP pass. Supabase-managed extension warnings are not counted as app defects.
 
 ## Dependency advisory assessment

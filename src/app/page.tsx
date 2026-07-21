@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 const roleCards = [
   { href: "/order/demo", eyebrow: "Customer", title: "Order from your table", detail: "Browse a live-safe demo menu, keep the cart honest, and see the session boundary." },
   { href: "/kds", eyebrow: "Kitchen", title: "Keep the pass clear", detail: "A high-density queue with station ownership, timers, and reconnect-safe states." },

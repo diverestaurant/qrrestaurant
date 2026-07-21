@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getBrowserSupabaseClient } from "@/browser/staff-runtime";
 import type { AdminOverviewView } from "@/contracts/view-models";
+import { MENU_IMAGE_MAX_BYTES, menuImageContentTypes, type MenuImageUploadIntent } from "@/modules/admin/contracts/menu-image";
 import { formatMinorForAmountInput, parseMajorAmountToMinor } from "@/modules/pricing/application/major-amount";
 import type { SendCommand } from "@/ui/staff/AdminOperations";
 
@@ -48,17 +48,55 @@ function AdvancedItemEditor({ branchId, restaurantId, item, send }: { branchId: 
   async function uploadImage() {
     if (!file || !imageAlt.trim()) return;
     setImageBusy(true); setImageError(null);
-    const allowed = new Map([["image/jpeg", "jpg"], ["image/png", "png"], ["image/webp", "webp"]]);
-    const extension = allowed.get(file.type);
-    if (!extension || file.size > 5 * 1024 * 1024) { setImageBusy(false); setImageError("Use a JPEG, PNG, or WebP image no larger than 5 MiB."); return; }
-    const path = `${restaurantId}/${branchId}/${item.id}/${crypto.randomUUID()}.${extension}`;
-    const storage = getBrowserSupabaseClient().storage.from("menu-images");
-    const uploaded = await storage.upload(path, file, { contentType: file.type, upsert: false });
-    if (uploaded.error) { setImageBusy(false); setImageError("The image upload was rejected by branch storage policy."); return; }
-    const committed = await send<{ id: string; version: number }>(`image:${item.id}`, { type: "menu_item.image.set", menuItemId: item.id, expectedVersion: item.version, imagePath: path, imageAlt });
-    if (!committed) { await storage.remove([path]); setImageError("Image metadata was not committed; the uploaded object was removed."); }
-    else if (item.imagePath && item.imagePath !== path) await storage.remove([item.imagePath]);
-    setImageBusy(false);
+    if (!menuImageContentTypes.includes(file.type as (typeof menuImageContentTypes)[number]) || file.size > MENU_IMAGE_MAX_BYTES) {
+      setImageBusy(false); setImageError("Use a JPEG, PNG, or WebP image no larger than 5 MiB."); return;
+    }
+    const cleanup = async (imagePath: string) => fetch("/api/v1/staff/menu/images", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ restaurantId, branchId, menuItemId: item.id, imagePath }),
+      cache: "no-store",
+    });
+    try {
+      const intentResponse = await fetch("/api/v1/staff/menu/images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restaurantId, branchId, menuItemId: item.id, expectedVersion: item.version, imageAlt, contentType: file.type, size: file.size }),
+        cache: "no-store",
+      });
+      const intent = await intentResponse.json() as { ok: boolean; data?: MenuImageUploadIntent; error?: { message?: string } };
+      if (!intentResponse.ok || !intent.ok || !intent.data) throw new Error(intent.error?.message ?? "The private image upload could not be authorized.");
+
+      const uploadBody = new FormData();
+      uploadBody.append("cacheControl", "3600");
+      uploadBody.append("", file);
+      const uploaded = await fetch(intent.data.uploadUrl, { method: "PUT", headers: { "x-upsert": "false" }, body: uploadBody });
+      if (!uploaded.ok) throw new Error("The image upload was rejected by the private Storage boundary.");
+
+      const verificationResponse = await fetch("/api/v1/staff/menu/images", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restaurantId, branchId, menuItemId: item.id, imagePath: intent.data.imagePath, contentType: file.type, size: file.size }),
+        cache: "no-store",
+      });
+      const verification = await verificationResponse.json() as { ok: boolean; error?: { message?: string } };
+      if (!verificationResponse.ok || !verification.ok) {
+        await cleanup(intent.data.imagePath);
+        throw new Error(verification.error?.message ?? "The uploaded file is not a valid menu image.");
+      }
+
+      const committed = await send<{ id: string; version: number }>(`image:${item.id}`, { type: "menu_item.image.set", menuItemId: item.id, expectedVersion: item.version, imagePath: intent.data.imagePath, imageAlt });
+      if (!committed) {
+        await cleanup(intent.data.imagePath);
+        throw new Error("Image metadata was not committed; the uploaded object was removed.");
+      }
+      if (item.imagePath && item.imagePath !== intent.data.imagePath) await cleanup(item.imagePath);
+      setFile(null);
+    } catch (caught) {
+      setImageError(caught instanceof Error ? caught.message : "The private image upload could not be completed.");
+    } finally {
+      setImageBusy(false);
+    }
   }
 
   return <details className="rounded-2xl border bg-background p-4"><summary className="min-h-9 cursor-pointer font-semibold">Advanced configuration · {item.name}</summary><div className="mt-4 space-y-4" data-admin-dirty={dirty}><div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6"><label className="text-xs">Sort<input className="mt-1 min-h-10 w-full rounded-lg border bg-surface px-2" type="number" min={0} value={sortOrder} onChange={(event) => { setSortOrder(event.target.value); setDirty(true); }} /></label><label className="text-xs">Spice<select className="mt-1 min-h-10 w-full rounded-lg border bg-surface px-2" value={spiceLevel} onChange={(event) => { setSpiceLevel(event.target.value); setDirty(true); }}><option value="0">None</option><option value="1">1 / 3</option><option value="2">2 / 3</option><option value="3">3 / 3</option></select></label><label className="text-xs">Available from<input className="mt-1 min-h-10 w-full rounded-lg border bg-surface px-2" type="time" value={availableFrom} onChange={(event) => { setAvailableFrom(event.target.value); setDirty(true); }} /></label><label className="text-xs">Available until<input className="mt-1 min-h-10 w-full rounded-lg border bg-surface px-2" type="time" value={availableUntil} onChange={(event) => { setAvailableUntil(event.target.value); setDirty(true); }} /></label><label className="flex min-h-10 items-center gap-2 self-end text-xs"><input checked={featured} type="checkbox" onChange={(event) => { setFeatured(event.target.checked); setDirty(true); }} /> Featured</label><button className="min-h-10 self-end rounded-full border px-3 text-xs font-semibold" disabled={!dirty} onClick={() => void send(`item-config:${item.id}`, { type: "menu_item.configuration.update", menuItemId: item.id, expectedVersion: item.version, name: item.name, description: item.description, basePriceMinor: item.basePriceMinor, stationKey: item.stationKey, visible: item.visible, sortOrder: Number(sortOrder), featured, spiceLevel: Number(spiceLevel), taxEligible, serviceEligible, operatingRules: { ...(availableFrom ? { availableFrom } : {}), ...(availableUntil ? { availableUntil } : {}) } }).then((result) => { if (result) setDirty(false); })}>Save settings</button></div><div className="flex flex-wrap gap-3"><label className="flex min-h-10 items-center gap-2 rounded-full border bg-surface px-3 text-xs"><input checked={taxEligible} type="checkbox" onChange={(event) => { setTaxEligible(event.target.checked); setDirty(true); }} /> Tax eligible</label><label className="flex min-h-10 items-center gap-2 rounded-full border bg-surface px-3 text-xs"><input checked={serviceEligible} type="checkbox" onChange={(event) => { setServiceEligible(event.target.checked); setDirty(true); }} /> Service-charge eligible</label></div></div><div className="mt-5 rounded-xl border p-3"><h4 className="text-sm font-semibold">Private menu image</h4><div className="mt-3 grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><label className="text-xs">Image<input accept="image/jpeg,image/png,image/webp" className="mt-1 block min-h-10 w-full text-sm" type="file" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></label><label className="text-xs">Alt text<input className="mt-1 min-h-10 w-full rounded-lg border px-2 text-sm" maxLength={180} value={imageAlt} onChange={(event) => setImageAlt(event.target.value)} /></label><button className="min-h-10 self-end rounded-full border px-3 text-xs font-semibold" disabled={!file || !imageAlt.trim() || imageBusy} onClick={() => void uploadImage()}>{imageBusy ? "Uploading…" : item.imagePath ? "Replace image" : "Upload image"}</button></div>{imageError && <p className="mt-2 text-xs text-danger" role="alert">{imageError}</p>}<p className="mt-2 text-xs text-muted">Private Storage path is branch-scoped; customers receive a short-lived signed URL.</p></div><div className="mt-5 rounded-xl border p-3"><h4 className="text-sm font-semibold">Variants</h4><div className="mt-3 grid gap-2 sm:grid-cols-[1fr_140px_auto]"><label className="text-xs">New variant<input className="mt-1 min-h-10 w-full rounded-lg border px-2 text-sm" value={variantName} onChange={(event) => setVariantName(event.target.value)} /></label><label className="text-xs">Price delta ({item.currency})<input className="mt-1 min-h-10 w-full rounded-lg border px-2 text-sm" inputMode="decimal" value={variantPrice} onChange={(event) => setVariantPrice(event.target.value)} /></label><button className="min-h-10 self-end rounded-full border px-3 text-xs font-semibold" disabled={!variantName.trim()} onClick={() => void send("variant:create", { type: "menu_variant.upsert", menuItemId: item.id, name: variantName, priceDeltaMinor: minor(variantPrice), active: true, sortOrder: item.variants.length }).then((result) => { if (result) { setVariantName(""); setVariantPrice("0.00"); } })}>Add variant</button></div><div className="mt-3 space-y-2">{item.variants.map((variant) => <VariantEditor currency={item.currency} itemId={item.id} key={variant.id} send={send} variant={variant} />)}</div></div></details>;

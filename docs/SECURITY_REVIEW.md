@@ -1,7 +1,7 @@
 # Security Review
 
-Review status: Architecture threat review plus local automated verification  
-Implementation verification: Partial local M0–M10 slices verified; full Finish Line review remains open  
+Review status: Architecture threat review plus complete local automated-scope verification
+Implementation verification: M0–M9 and M10 automated scope tested locally; hosted/manual Finish Line review remains open
 Last updated: 2026-07-21
 
 ## Executive conclusion
@@ -90,15 +90,15 @@ The architecture addresses the highest-risk boundaries, and local migrations, gr
 
 - Zod validation at every external boundary.
 - React escaping; no tenant HTML/JS.
-- CSP/headers/CORS/CSRF policies verified in deployed environment.
+- Per-request nonce CSP and security headers verified locally; deployed CORS/CSRF/header verification remains required in current Staging.
 - Server Action body size and origins remain narrow.
 - Error responses omit SQL, stack, secret, internal ID and permission predicate.
 - Correlation ID is opaque and safe to expose.
 
 ## Storage
 
-- Approved raster formats by content signature; SVG disabled by default.
-- File size, dimensions and decompression limits.
+- Approved JPEG/PNG/WebP formats are verified server-side by content signature after private upload; SVG is disabled.
+- Five MiB file size and 4096 × 4096 dimension limits are enforced before metadata publication.
 - Opaque tenant-scoped paths.
 - Separate read/write/upsert/delete policy tests.
 - Image processing cannot fetch arbitrary attacker URLs.
@@ -128,4 +128,4 @@ Technical data inventory and minimization are designed. Malaysia PDPA, privacy n
 
 ## Current finding
 
-`SEC-PLAN-001`: The local foundation now exists, but the full control matrix remains incomplete. Severity: Gate. Owner: Principal Architect/Security Reviewer. Resolution: complete local M1–M10 evidence, then separately authorized Staging verification.
+`SEC-HOSTED-001`: The local automated control matrix passes, including 508 pgTAP assertions, DB lint, role/anonymous HTTP boundaries, nonce CSP, dependency high/critical gate and malicious-upload rejection. Severity: Release gate. Owner: Principal Architect/Security Reviewer. Resolution: repeat the selected matrix in the authorized current Staging/Preview, complete manual review and close owner-controlled operational inputs.

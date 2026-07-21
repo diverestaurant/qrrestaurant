@@ -5,7 +5,7 @@ Execution mode: `BUILD` plus authorized named Staging Supabase migration/RLS ver
 Target Finish Line: A
 Production readiness: `NOT_MET`
 
-Step 5/7 is complete locally and step 6/7 is in progress. The complete current local automated matrix passes: lint, strict typecheck, 23 Vitest files / 68 tests, production Webpack build, 31 pgTAP files / 508 assertions, and 81 passed Playwright checks with 27 expected cross-project skips and zero failures. A localhost-only Supabase readiness gate prevents browser tests from racing a freshly restarted Auth/REST stack.
+Step 5/7 is complete locally and step 6/7 is in progress. The complete current local automated matrix passes: lint, strict typecheck, local database lint, 24 Vitest files / 72 tests, production Webpack build, 31 pgTAP files / 508 assertions, and 83 passed Playwright checks with 27 expected cross-project skips and zero failures. Fresh stateful suites explicitly reset only local synthetic Supabase, then wait for Auth/REST readiness.
 
 ## Delivery status
 
@@ -31,6 +31,8 @@ Step 5/7 is complete locally and step 6/7 is in progress. The complete current l
 - Printable one-time Table Entry QR and immutable receipt/reprint pages with print-only CSS.
 - English launch catalog, safe `zh/ms` English fallback and QA-only 30–50% pseudo-long layout mode.
 - RLS-protected, versioned staff self-profile with masked audit/outbox facts.
+- Strict per-request nonce CSP, production security headers and hidden framework signature; all rendered nonce tags matched the response header in the production runtime smoke.
+- Menu-image UI no longer imports a database/Storage client. A scoped server intent authorizes direct private upload, then server verification rejects MIME disguises, invalid dimensions and byte-count mismatches before metadata commit.
 - Hydration-transition contrast defect fixed; repeated axe verification passed 10/10 before the clean full matrix passed.
 - `npm audit --audit-level=high` reports zero high/critical findings. Two moderate findings are Next.js-vendored build-time PostCSS; the proposed force fix is a breaking downgrade and was not applied.
 

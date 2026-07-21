@@ -12,12 +12,14 @@
     "test:watch": "vitest",
     "pretest:e2e": "node scripts/wait-for-local-supabase.mjs",
     "test:e2e": "playwright test",
+    "test:e2e:fresh": "npm run db:reset && npm run test:e2e",
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "db:init": "SUPABASE_TELEMETRY_DISABLED=1 supabase init",
     "db:start": "SUPABASE_TELEMETRY_DISABLED=1 supabase start",
     "db:stop": "SUPABASE_TELEMETRY_DISABLED=1 supabase stop",
-    "db:reset": "SUPABASE_TELEMETRY_DISABLED=1 supabase db reset",
-    "db:test": "SUPABASE_TELEMETRY_DISABLED=1 supabase test db"
+    "db:reset": "SUPABASE_TELEMETRY_DISABLED=1 supabase db reset --local",
+    "db:test": "SUPABASE_TELEMETRY_DISABLED=1 supabase test db",
+    "db:test:fresh": "npm run db:reset && npm run db:test"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.3",

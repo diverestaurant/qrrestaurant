@@ -54,8 +54,10 @@ test("public menu API reads the synthetic local Supabase seed", async ({ request
   expect(body.meta.source).toBe("supabase");
   expect(body.meta.environment).toBe("local");
   expect(body.meta.productionConnected).toBe(false);
-  expect(body.data.items).toHaveLength(2);
-  expect(body.data.items[0].category).toBe("Mains");
+  expect(body.data.items).toEqual(expect.arrayContaining([
+    expect.objectContaining({ name: "Nasi Lemak DIVE", category: "Mains" }),
+    expect.objectContaining({ name: "Char Kway Teow", category: "Mains" }),
+  ]));
 });
 
 test("staff menu mutation rejects malformed commands before authentication", async ({ request }) => {

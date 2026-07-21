@@ -11,11 +11,11 @@ The complete local automated matrix passes, but the newest Staging migration/Pre
 | V1 Scope Matrix frozen | PASS | `V1_SCOPE_MATRIX.md` execution baseline | owner approval required for scope change |
 | In-Scope M0–M9 implementation | PASS locally | connected repository/UI/database flows; 32 migrations; full local browser matrix | fresh Staging verification |
 | Golden Path in Staging | IN PROGRESS | prior Preview was READY/preview, but predates current slices | migrate Staging and run fresh hosted Golden Path |
-| Security/RLS/concurrency | PASS locally | 31 pgTAP files / 508 assertions; full role/anonymous HTTP boundaries | repeat selected checks in Staging |
+| Security/RLS/concurrency | PASS locally | 31 pgTAP files / 508 assertions; DB lint; nonce CSP; upload signature/dimension checks; full role/anonymous HTTP boundaries | repeat selected checks in Staging |
 | Pricing/state/payment/receipt | PASS locally | authoritative pricing, discounts, multi-tender, receipt/reprint, close/reconciliation E2E | hosted rehearsal and approved financial rules |
-| Five role apps/recovery | PASS locally | Customer/KDS/Waiter/Cashier/Admin, Realtime/resync/offline paths in 81 passing browser checks | hosted and manual device evidence |
+| Five role apps/recovery | PASS locally | Customer/KDS/Waiter/Cashier/Admin, Realtime/resync/offline paths in 83 passing browser checks | hosted and manual device evidence |
 | Accessibility/responsive/i18n | PASS automated / IN PROGRESS manual | axe, focus, 320px, pseudo-long and safe locale fallback pass | screen-reader, real devices, usability, final UI review |
-| Full automated quality matrix | PASS | lint/typecheck, 68 unit, 508 DB, 81 browser, build, high/critical audit gates | CI/hosted repeat as applicable |
+| Full automated quality matrix | PASS | lint/typecheck/DB lint, 72 unit, 508 DB, 83 browser, build/runtime CSP and high/critical audit gates | CI/hosted repeat as applicable |
 | No P0/P1 defects | IN PROGRESS | no open automated P0/P1 found; contrast/startup flakes fixed and regressed | manual/final defect audit |
 | Performance/load | IN PROGRESS | local latency and 30-request burst pass | agreed Pilot model, real device/Wi-Fi targets |
 | Backup/restore/operations | IN PROGRESS | current local restore: 33 tables/57 policies/33 RLS/0 gaps plus synthetic Storage byte-compare | hosted/provider drill, alerts and owners |

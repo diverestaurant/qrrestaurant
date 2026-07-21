@@ -52,6 +52,25 @@ test.describe("local M10 browser hardening", () => {
     expect(elapsedMs).toBeLessThan(3000);
   });
 
+  test("application responses carry the reviewed browser security headers", async ({ request }) => {
+    const response = await request.get("/");
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["x-content-type-options"]).toBe("nosniff");
+    expect(response.headers()["x-frame-options"]).toBe("DENY");
+    expect(response.headers()["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(response.headers()["permissions-policy"]).toContain("payment=()");
+    expect(response.headers()["cross-origin-opener-policy"]).toBe("same-origin");
+    expect(response.headers()["strict-transport-security"]).toBe("max-age=31536000");
+    const csp = response.headers()["content-security-policy"];
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("https://*.supabase.co");
+    expect(csp).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic'/);
+    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
+    expect(response.headers()["x-powered-by"]).toBeUndefined();
+  });
+
   test("visible recovery status moves offline and confirms the app after reconnect", async ({ page }) => {
     const healthResponse = page.waitForResponse((response) => response.url().endsWith("/api/health"));
     await page.goto("/waiter");

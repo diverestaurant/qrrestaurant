@@ -12,9 +12,10 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 
 - Local database reset applies 32 migrations through `20260721155000_staff_self_profile.sql`.
 - pgTAP: 31 SQL files / 508 assertions pass.
-- Vitest: 23 files / 68 tests pass.
-- Playwright: 108 total, 81 pass / 27 expected role-project skips / 0 failures.
-- Lint, strict typecheck and `next build --webpack` pass.
+- Vitest: 24 files / 72 tests pass.
+- Playwright: 110 total, 83 pass / 27 expected role-project skips / 0 failures from a fresh local reset.
+- Lint, strict typecheck, local Supabase database lint and `next build --webpack` pass.
+- Production runtime CSP uses per-request nonces: all 17 rendered nonce tags matched the response nonce, production `script-src` omitted `unsafe-inline`, and `x-powered-by` was absent.
 - Dependency gate: zero high/critical findings; two evaluated moderate Next.js-vendored PostCSS findings remain without a safe non-breaking package fix.
 - Independent UI/UX Design Subagent review is complete; latest GREEN/YELLOW work stayed within the approved Master Plan architecture.
 
@@ -28,6 +29,7 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 - English-first locale contract, `zh/ms` safe fallback and pseudo-long responsive QA.
 - Versioned staff self-profile with self-only RLS and privacy-safe audit/outbox.
 - Local accessibility, 320px, offline/reconnect, concurrency, 30-request burst and Storage object backup/restore automation.
+- Authorized private menu-image upload intents with server-side byte count, JPEG/PNG/WebP signature and 4096 × 4096 dimension verification before metadata publication.
 
 ## Next executable work
 

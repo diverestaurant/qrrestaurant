@@ -322,6 +322,8 @@ test("Admin UI commits menu, table, QR, station and feature-flag operations", as
   const stationKey = `s${suffix}`;
   const stationName = `Station ${suffix}`;
   const flagKey = `e2e.${suffix}`;
+  const imageAlt = `Synthetic plated ${suffix}`;
+  let imagePath: string | null = null;
 
   try {
     await page.goto("/admin");
@@ -335,6 +337,39 @@ test("Admin UI commits menu, table, QR, station and feature-flag operations", as
     await menuPanel.getByLabel("Price (MYR)").first().fill("12.50");
     await page.getByRole("button", { name: "Create item" }).click();
     await expect(page.locator(`input[value="${itemName}"]`)).toBeVisible();
+
+    const imageEditor = page.getByText(`Advanced configuration · ${itemName}`, { exact: true }).locator("..");
+    await imageEditor.locator("summary").click();
+    await imageEditor.getByLabel("Alt text").fill(imageAlt);
+    await imageEditor.getByLabel("Image").setInputFiles({
+      name: "disguised.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("<script>alert('synthetic')</script>"),
+    });
+    await imageEditor.getByRole("button", { name: "Upload image" }).click();
+    await expect(imageEditor.getByRole("alert")).toContainText("not a valid JPEG, PNG, or WebP image");
+    await imageEditor.getByLabel("Image").setInputFiles({
+      name: "synthetic.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64"),
+    });
+    const imageCommand = page.waitForResponse((response) => response.url().endsWith("/api/v1/staff/admin/commands") && response.request().method() === "POST");
+    await imageEditor.getByRole("button", { name: "Upload image" }).click();
+    expect((await imageCommand).ok()).toBe(true);
+    await expect(page.getByRole("status").filter({ hasText: "Admin command committed" })).toBeVisible();
+    await expect.poll(async () => {
+      const result = await account.admin.from("menu_items").select("image_path").eq("branch_id", branchId).eq("name", itemName).single();
+      if (result.error) throw result.error;
+      return result.data.image_path;
+    }).not.toBeNull();
+    const storedImage = await account.admin.from("menu_items").select("image_path,image_alt").eq("branch_id", branchId).eq("name", itemName).single();
+    if (storedImage.error) throw storedImage.error;
+    imagePath = storedImage.data.image_path;
+    expect(imagePath).toMatch(new RegExp(`^${restaurantId}/${branchId}/[0-9a-f-]{36}/[0-9a-f-]{36}\\.png$`));
+    expect(storedImage.data.image_alt).toBe(imageAlt);
+    const storedObject = await account.admin.storage.from("menu-images").download(imagePath!);
+    if (storedObject.error || !storedObject.data) throw storedObject.error ?? new Error("Uploaded menu image was not readable.");
+    expect((await storedObject.data.arrayBuffer()).byteLength).toBeGreaterThan(0);
 
     const tablesPanel = page.getByRole("heading", { name: "Tables and secure QR" }).locator("..");
     await tablesPanel.getByLabel("New table label").fill(tableLabel);
@@ -373,15 +408,36 @@ test("Admin UI commits menu, table, QR, station and feature-flag operations", as
     expect(token.data.token_hash).toMatch(/^[a-f0-9]{64}$/);
     expect(token.data.active).toBe(true);
   } finally {
-    const table = await account.admin.from("restaurant_tables").select("id").eq("branch_id", branchId).eq("label", tableLabel).maybeSingle();
+    const table = await account.admin.from("restaurant_tables").select("id,label,area,capacity,version").eq("branch_id", branchId).eq("label", tableLabel).maybeSingle();
     if (table.data) {
-      await account.admin.from("table_qr_tokens").delete().eq("table_id", table.data.id);
-      await account.admin.from("restaurant_tables").delete().eq("id", table.data.id);
+      const archived = await apiJson(page, "/api/v1/staff/admin/commands", { method: "POST", body: { type: "table.update", restaurantId, branchId, idempotencyKey: randomUUID(), tableId: table.data.id, expectedVersion: table.data.version, label: table.data.label, area: table.data.area ?? "", capacity: table.data.capacity, active: false } });
+      if (archived.status !== 200) throw new Error(`Synthetic table cleanup failed with ${archived.status}.`);
     }
-    await account.admin.from("menu_items").delete().eq("branch_id", branchId).eq("name", itemName);
-    await account.admin.from("menu_categories").delete().eq("branch_id", branchId).eq("name", categoryName);
-    await account.admin.from("kitchen_stations").delete().eq("branch_id", branchId).eq("station_key", stationKey);
-    await account.admin.from("feature_flags").delete().eq("branch_id", branchId).eq("flag_key", flagKey);
+    if (!imagePath) {
+      const item = await account.admin.from("menu_items").select("image_path").eq("branch_id", branchId).eq("name", itemName).maybeSingle();
+      imagePath = item.data?.image_path ?? null;
+    }
+    if (imagePath) await account.admin.storage.from("menu-images").remove([imagePath]);
+    const item = await account.admin.from("menu_items").select("id,name,description,base_price_minor,station_key,version").eq("branch_id", branchId).eq("name", itemName).maybeSingle();
+    if (item.data) {
+      const archived = await apiJson(page, "/api/v1/staff/admin/commands", { method: "POST", body: { type: "menu_item.update", restaurantId, branchId, idempotencyKey: randomUUID(), menuItemId: item.data.id, expectedVersion: item.data.version, name: item.data.name, description: item.data.description ?? "", basePriceMinor: Number(item.data.base_price_minor), stationKey: item.data.station_key ?? "", visible: false } });
+      if (archived.status !== 200) throw new Error(`Synthetic menu item cleanup failed with ${archived.status}.`);
+    }
+    const category = await account.admin.from("menu_categories").select("id,name,description,sort_order,version").eq("branch_id", branchId).eq("name", categoryName).maybeSingle();
+    if (category.data) {
+      const archived = await apiJson(page, "/api/v1/staff/admin/commands", { method: "POST", body: { type: "menu_category.update", restaurantId, branchId, idempotencyKey: randomUUID(), categoryId: category.data.id, expectedVersion: category.data.version, name: category.data.name, description: category.data.description ?? "", sortOrder: category.data.sort_order, visible: false } });
+      if (archived.status !== 200) throw new Error(`Synthetic category cleanup failed with ${archived.status}.`);
+    }
+    const station = await account.admin.from("kitchen_stations").select("id,station_key,name,version").eq("branch_id", branchId).eq("station_key", stationKey).maybeSingle();
+    if (station.data) {
+      const archived = await apiJson(page, "/api/v1/staff/admin/commands", { method: "POST", body: { type: "station.upsert", restaurantId, branchId, idempotencyKey: randomUUID(), stationId: station.data.id, expectedVersion: station.data.version, stationKey: station.data.station_key, name: station.data.name, active: false } });
+      if (archived.status !== 200) throw new Error(`Synthetic station cleanup failed with ${archived.status}.`);
+    }
+    const flag = await account.admin.from("feature_flags").select("flag_key,description,version").eq("branch_id", branchId).eq("flag_key", flagKey).maybeSingle();
+    if (flag.data) {
+      const archived = await apiJson(page, "/api/v1/staff/admin/commands", { method: "POST", body: { type: "feature_flag.set", restaurantId, branchId, idempotencyKey: randomUUID(), flagKey: flag.data.flag_key, description: flag.data.description ?? "", enabled: false, expectedVersion: flag.data.version } });
+      if (archived.status !== 200) throw new Error(`Synthetic feature flag cleanup failed with ${archived.status}.`);
+    }
     await account.admin.auth.admin.deleteUser(account.userId);
   }
 });
