@@ -1,7 +1,7 @@
 # Dive Restaurant QR Ordering System — Master Plan
 
 Document status: Designed; local `BUILD` execution in progress  
-Implementation status: Partial local implementation; M0–M2 foundation and documented M3–M10 slices have local source/test evidence  
+Implementation status: M0–M9 complete locally; M10 automated matrix passes; M11 Staging schema/RLS verification passes; Preview/manual/operations gates remain
 Target Finish Line: A — Production Ready Candidate, after separately authorized BUILD and STAGING_VERIFY  
 Last updated: 2026-07-21
 
@@ -370,4 +370,4 @@ Authoritative list and manual fallback: [`V1_SCOPE_MATRIX.md`](V1_SCOPE_MATRIX.m
 
 ## 36. Current gate
 
-Local BUILD status: M0–M9 are implemented and pass the current local automated matrix; M10 automated hardening passes while manual device/screen-reader/usability/final-review evidence remains. Local reset applies 32 migrations, 508 pgTAP assertions pass, and the complete Playwright matrix passes 85 checks with 27 expected cross-project skips and zero failures. The named Staging Supabase project has the previously reviewed first 16 migrations; the 16 newer additive migrations require reviewed push and verification. Vercel retains the explicitly authorized inert bootstrap and an earlier inspect-confirmed real Preview, but that Preview predates the newest slices. Finish Line A requires a fresh non-production Staging Golden Path plus manual/device/load/provider-operational evidence and required owner inputs. Production and unrelated external projects remain out of scope and separately gated.
+Local BUILD status: M0–M9 are implemented and pass the current local automated matrix; M10 automated hardening passes while manual device/screen-reader/usability/final-review evidence remains. Local reset applies 32 migrations, 508 pgTAP assertions pass, and the complete Playwright matrix passes 85 checks with 27 expected cross-project skips and zero failures. The named Staging Supabase project now has all 32 migrations through `20260721155000_staff_self_profile.sql`; linked DB lint, RLS coverage, grants, Realtime publication, constraint validity and security advisor error gate were verified. Vercel retains the inert bootstrap, but the first real-app deploy was accidentally created as Production (`dpl_4uXWYhzK8zP5D83UuTazpicEy5h2`) and must not be treated as a release; explicit Preview attempts are currently blocked by Vercel team access for the local Git author. Finish Line A requires a usable Preview Golden Path plus manual/device/load/provider-operational evidence and required owner inputs. Production and unrelated external projects remain out of scope and separately gated.

@@ -40,11 +40,17 @@ The browser matrix covers customer join/order/replay/tracking/service requests a
 
 `npm audit` reports two moderate findings for PostCSS vendored inside Next.js. The app does not accept or transform user-provided CSS at runtime; this PostCSS path is build-time tooling. `npm audit fix --force` proposes a breaking downgrade to Next 9.3.3, so it is rejected. Track the upstream patched Next.js release and upgrade through the pinned dependency review instead of forcing an unsafe downgrade.
 
-## Existing Staging evidence
+## Current Staging evidence
+
+- The named Staging project `ztmftdjmtpwymfatmhjp` now matches all 32 local migrations through `20260721155000_staff_self_profile.sql` after a dry-run that listed exactly the 16 pending files.
+- Post-migration linked DB lint reports no schema errors. Read-only verification found 33 public tables with zero RLS gaps, 57 public policies, 13 public Realtime tables, zero application `SECURITY DEFINER` functions without an explicit `search_path`, and the security advisor error gate reports no issues.
+- New tables `branch_settings`, `feature_flags`, `profiles` and `subscriptions` have RLS enabled, deny `anon` SELECT, allow intended `authenticated`/`service_role` SELECT. The two public tables without policies (`idempotency_keys`, `outbox_events`) are service-role-only protected tables. The sole unvalidated constraint is Supabase-managed `realtime.messages.messages_payload_exclusive`.
+
+## Historical Staging/Preview evidence
 
 - The named Staging Supabase project previously matched the first 16 reviewed migrations and passed RLS/tenant/integrity checks with synthetic seed only.
 - Vercel retains the explicitly authorized inert bootstrap and an earlier real Preview that was `READY` with `inspect.target=preview`.
-- This hosted evidence predates migrations `20260721140000`–`20260721155000` and the newest application slices; it is not current Finish Line evidence.
+- The prior hosted Preview evidence predates the newest application slices. The latest explicit Preview attempts were `dpl_7cKdFjoyvvhBYeGChnXxtiTKKCtm` and `dpl_HnyyYCHyGUvjK1naNV8xf3jWLqxR`, both `target=preview` but `BLOCKED` before build because the Git author lacked Vercel team access. A default CLI deployment accidentally created `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` as `target=production`; it is not accepted as release evidence and must not be modified without exact owner authorization.
 
 ## Current local restore evidence
 

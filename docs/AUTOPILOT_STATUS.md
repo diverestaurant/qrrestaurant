@@ -22,7 +22,7 @@ Step 5/7 is complete locally and step 6/7 is in progress. The complete current l
 | M8 | Complete locally | Tested Locally | discounts, multi-tender manual payment, receipts/reprint, close and reconciliation |
 | M9 | Complete locally | Tested Locally | full V1 Admin, Branch/Platform lifecycle, reports, audit viewer, flags, print and English-first i18n architecture |
 | M10 | In progress | Tested Locally (automated scope) | full automated matrix passes; manual screen-reader/device/usability and final independent review evidence remain |
-| M11 | In progress | Tested Locally (restore scope) | current 33-table/57-policy schema restore and synthetic Storage byte-compare pass; newest Staging migrations, fresh Preview, hosted operations and owner inputs remain |
+| M11 | In progress | Verified in Staging (schema/RLS scope) | all 32 migrations, linked DB lint, 33-table/57-policy/13-Realtime verification and security error gate pass; usable Preview, hosted operations and owner inputs remain |
 | M12 | Not authorized | Designed | Production and Pilot require separate RELEASE/PILOT authorization |
 
 ## Latest completed slices
@@ -39,11 +39,11 @@ Step 5/7 is complete locally and step 6/7 is in progress. The complete current l
 
 ## External state and remaining gates
 
-- Staging Supabase `ztmftdjmtpwymfatmhjp` has the previously reviewed first 16 migrations. Sixteen newer additive local migrations (`20260721140000`–`20260721155000`) still require reviewed dry-run, push and post-migration RLS/isolation/integrity verification.
-- Vercel project `prj_JLBEMJVcJsR53G6uefmsVwARwgOL` retains the explicitly authorized inert bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN` and prior real Preview `dpl_9ZDvXRQqKjARWiVyiZ386sZszuNn` (`READY`, `target=preview`). The Preview predates the newest slices and must be refreshed without `--prod` or Promote.
+- Staging Supabase `ztmftdjmtpwymfatmhjp` now has all 32 migrations through `20260721155000`; linked DB lint has no schema errors, all 33 public tables have RLS, 57 policies and 13 Realtime tables are present, 0 app SECURITY DEFINER functions lack an explicit search_path, and the security advisor error gate is clean. The sole unvalidated constraint is Supabase-managed `realtime.messages.messages_payload_exclusive` and is not an app migration defect.
+- Vercel project `prj_JLBEMJVcJsR53G6uefmsVwARwgOL` retains the inert bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN`. An unintended real-app Production deployment `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` is READY with Production aliases and must remain untouched until the owner explicitly authorizes exact remediation. Explicit Preview deployments `dpl_7cKdFjoyvvhBYeGChnXxtiTKKCtm` and `dpl_HnyyYCHyGUvjK1naNV8xf3jWLqxR` are BLOCKED because Vercel rejects the local Git author email; no usable current Preview exists.
 - No real customer data, real payment, real password or paid service is used. Production remains out of scope.
 - Finish Line A still needs the newest Staging schema/app Golden Path plus manual/device/accessibility/operational evidence and the release-blocking client inputs tracked in `CLIENT_INPUT_REQUIRED.md`.
 
 ## Next action
 
-Checkpoint `8d13585` is complete. Obtain refreshed current-session authorization accepted by the remote tool boundary, then present/confirm the exact 16-migration order, execute the Staging dry-run/push/verification and deploy only a fresh Vercel Preview. Continue M10/M11 after hosted evidence; never use `--prod` or Promote for the real app.
+Staging migration/RLS verification is complete. Resolve the Vercel team-access identity gate, obtain explicit remediation authorization for the exact unintended Production deployment if deletion/rollback is desired, then deploy only with `--target=preview --skip-domain` and verify a READY Preview. Continue M10/M11 after hosted evidence; never use `--prod` or Promote for the real app.

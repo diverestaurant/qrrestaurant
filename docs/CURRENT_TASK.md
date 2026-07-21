@@ -2,7 +2,7 @@
 
 Mode: `BUILD` plus authorized named Staging Supabase/Vercel Preview work
 Milestone: M10–M11 — Staging rehearsal and release-candidate evidence
-Status: In progress; step 5/7 complete locally, step 6/7 in progress
+Status: In progress; local step 5/7 and Staging schema/RLS step 6/7 complete; Vercel Preview verification is blocked
 
 ## Objective
 
@@ -10,7 +10,7 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 
 ## Current authoritative evidence
 
-- Local database reset applies 32 migrations through `20260721155000_staff_self_profile.sql`.
+- Local database reset and named Staging now apply 32 migrations through `20260721155000_staff_self_profile.sql`.
 - pgTAP: 31 SQL files / 508 assertions pass.
 - Vitest: 25 files / 73 tests pass.
 - Playwright: 112 total, 85 pass / 27 expected role-project skips / 0 failures from a fresh local reset.
@@ -36,10 +36,10 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 
 1. Checkpoint `8d13585` preserves the current reviewed local source, tests and evidence with a clean worktree.
 2. Obtain refreshed current-session authorization accepted by the remote tool boundary; the previous attempt was denied against a stale `EXTERNAL_SCOPE=NONE` snapshot before any remote access.
-3. Show/confirm the pending migration order `20260721140000` through `20260721155000` and additive/locking/security risks.
-4. Run linked Staging dry-run, then push only those migrations; do not seed over existing data, reset or delete.
-5. Verify migration history, RLS coverage, cross-tenant isolation, grants, Realtime publication and basic data integrity on the named Staging project.
-6. Deploy the current app only to Vercel Preview, verify `inspect.target=preview`, run hosted health/public/customer/staff authorization Golden Paths and preserve the previous inert bootstrap.
+3. Use the reviewed migration order/risk record already shown in this handoff; no seed, reset or delete was used.
+4. Verify migration history, RLS coverage, grants, Realtime publication and basic data integrity on the named Staging project — complete for schema/RLS scope.
+5. Resolve the Vercel team-access identity gate and obtain exact owner direction for unintended Production deployment remediation.
+6. Deploy the current app only with explicit `--target=preview --skip-domain`, verify `READY` and `inspect.target=preview`, then run hosted health/public/customer/staff authorization Golden Paths.
 7. Continue M10/M11 manual device/screen-reader/usability, hosted backup/restore/observability and release-input evidence.
 
 ## Boundaries
@@ -47,4 +47,4 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 - Never use `--prod`, Promote or any Production mutation for the real app.
 - Never reset/delete Staging data or use a destructive migration without new explicit approval.
 - Never use real customer data, real payments, real passwords or paid services.
-- Finish Line A remains `NOT_MET` until hosted and manual/operational gates are evidenced.
+- Finish Line A remains `NOT_MET` until a usable Preview hosted Golden Path, manual/operational evidence and owner gates are evidenced.

@@ -6,7 +6,7 @@ Execution: continue; do not restart or discard changes
 
 ## Resume point
 
-Step 5/7 is complete locally and checkpointed at `8d13585`. Resume at step 6/7: obtain refreshed current-session remote authorization, then run the reviewed Staging Supabase migration/RLS rehearsal and a fresh Vercel Preview Golden Path. Never deploy the real app to Production.
+Local step 5/7 and Staging schema/RLS step 6/7 are complete. Resume by resolving the exact Vercel Preview team-access gate and obtaining owner direction for unintended Production deployment `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2`; never deploy or modify Production without that direction.
 
 ## Current local evidence
 
@@ -35,20 +35,19 @@ All prior Customer, KDS, Waiter, Cashier, Admin, pricing, multi-tender, receipt,
 
 ## External state
 
-- Supabase Staging: `ztmftdjmtpwymfatmhjp`. Remote has the previously reviewed first 16 migrations; local has 16 additional migrations from `20260721140000` through `20260721155000` awaiting dry-run/push/verification.
-- Vercel team/project: `dive-restaurant` / `prj_JLBEMJVcJsR53G6uefmsVwARwgOL`.
+- Supabase Staging: `ztmftdjmtpwymfatmhjp`. All 32 migrations through `20260721155000` are applied; linked DB lint, 33-table/57-policy/13-Realtime RLS verification and security advisor error gate pass. The only unvalidated constraint is Supabase-managed `realtime.messages.messages_payload_exclusive`.
+- Vercel team/project: `dive-restaurant` / `prj_JLBEMJVcJsR53G6uefmsVwARwgOL`. Explicit Preview deployments `dpl_7cKdFjoyvvhBYeGChnXxtiTKKCtm` and `dpl_HnyyYCHyGUvjK1naNV8xf3jWLqxR` are `BLOCKED` before build because `oscar@Oscars-MacBook-Pro.local` lacks team access. Unintended Production deployment `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` is `READY`; do not modify without exact owner authorization.
 - Retained inert bootstrap: `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN`.
 - Prior real Preview: `dpl_9ZDvXRQqKjARWiVyiZ386sZszuNn`, `READY`, `target=preview`; it predates current code.
 - Never use `--prod`, Promote, Production mutation, destructive Staging reset/delete, real customer/payment/password data or paid services.
 
 ## Exact next sequence
 
-1. Checkpoint `8d13585` is complete and the worktree was clean immediately afterward.
-2. Obtain refreshed explicit Staging authorization because the remote tool reviewer rejected the first dry-run using a stale `EXTERNAL_SCOPE=NONE` snapshot before remote access.
-3. Present/confirm the pending migration order and risk summary, then run linked dry-run and apply only reviewed migrations with no seed overwrite/reset/delete.
-4. Verify remote migration history, all exposed tables RLS, grants, tenant isolation, Realtime publication and integrity.
-5. Deploy current app only as Vercel Preview; verify `inspect.target=preview` and hosted Golden Path.
-6. Continue M10/M11 manual accessibility/device/usability, hosted backup/restore/observability and owner-input gates.
+1. Staging migration/RLS verification is complete and recorded.
+2. Resolve Vercel team-access identity for the current commit author or add that identity to team `dive-restaurant`.
+3. Obtain exact owner authorization before deleting/rolling back only `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2`.
+4. Deploy with explicit `--target=preview --skip-domain`, verify `READY` and `inspect.target=preview`, then run hosted Golden Path.
+5. Continue M10/M11 manual accessibility/device/usability, hosted backup/restore/observability and owner-input gates.
 
 ## Do not claim yet
 
