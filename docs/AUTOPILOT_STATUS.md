@@ -5,7 +5,7 @@ Execution mode: `BUILD` + authorized `STAGING_VERIFY` database and Vercel stagin
 Target Finish Line: A  
 Production readiness: `NOT_MET`
 
-Checkpoint 4/7: lint/typecheck, 22 unit-test files (62 tests) and Webpack production build pass. Database runtime evidence passes through migration `20260721143000` (21 pgTAP files / 263 assertions); migrations `144000`–`148000` are implemented with pgTAP coverage but are not yet runtime-verified because the current sandbox cannot access the Docker socket. The inert Vercel Production bootstrap and inspect-confirmed real Preview both exist; no real app was promoted to Production.
+Checkpoint 4/7 is committed and step 5/7 is in progress. Lint/typecheck, 22 unit-test files (62 tests), Webpack production build and the prior full Playwright matrix (65 passed / 21 expected skips / zero failures) pass; the new Platform slice passes targeted Playwright 2/2. A clean local reset applies 29 migrations through `20260721152000`; 29 pgTAP files / 451 assertions pass. The inert Vercel Production bootstrap and inspect-confirmed real Preview both exist; no real app was promoted to Production.
 
 ## Current milestone
 
@@ -18,14 +18,14 @@ M3–M10 — Core command slices and local hardening
 | M0 | Complete | Tested Locally | package/runtime validation, local Supabase and build baseline |
 | M1 | Complete | Tested Locally | App Router, typed contracts, role shells, local browser checks |
 | M2 | Complete | Tested Locally | migrations, grants, RLS, storage policy, pgTAP and advisors |
-| M3 | In progress | Implemented / Tested Locally (local adapters) | staff Session open API, transactional Session/hashed Join Code RPC, anonymous-claim join/grant RPC and RLS/validation tests |
+| M3 | In progress | Implemented / Tested Locally (local adapters/settings) | staff Session open API, transactional Session/hashed Join Code RPC, anonymous-claim join/grant RPC, versioned Restaurant/Branch settings and RLS/validation tests; branch lifecycle/self-profile remain |
 | M4 | In progress | Implemented / Tested Locally (repository read + mutation boundary) | local public menu repository/API/page, malformed/unauthenticated staff boundaries, synthetic staff RLS, idempotency and audit/outbox trigger |
 | M5 | In progress | Implemented / Tested Locally (local API/UI slice) | grant-bound customer order pricing/snapshots, variant/modifier selection and authoritative configuration snapshots, Customer Join Code/cart/order tracking/service-request UI, customer service requests, waiter transitions, RLS and server-only idempotency |
 | M6 | In progress | Implemented / Tested Locally (local API) | KDS order-item transition API, state/version guard and idempotency |
 | M7 | In progress | Implemented / Tested Locally (local API) | waiter service-request transition API, state/version guard and idempotency |
 | M8 | In progress | Implemented / Tested Locally (atomic local RPC/API) | cashier payment confirmation, allocation, paid-total update and RLS |
-| M9 | In progress | Implemented / Tested Locally (report boundary) | branch summary report RPC/API and tenant isolation |
-| M10 | In progress | Implemented / Tested Locally | 179 DB assertions, 58 passed browser checks with 16 expected skips, 43 unit assertions, scoped customer Session and staff Branch Realtime adapters with authoritative resync/reconnect/polling fallback, server-only staff repository snapshots, discount/multi-tender/receipt/close recovery, local Storage object backup/restore, synthetic 30-request menu read burst and portable schema restore evidence; Staging DB scope is Verified in Staging: 16/16 migrations, 29 RLS-enabled public tables, 52 policies, 8 Realtime tables and integrity checks passing; provider backup/restore and full device/app-Staging evidence remain |
+| M9 | In progress | Implemented / Tested Locally (administration/report boundaries) | branch summary plus bounded operations/reconciliation reports, Platform-only tenant lifecycle/manual subscription tracking, tenant isolation and guarded concurrent UI commands; print/i18n remain |
+| M10 | In progress | Implemented / Tested Locally | 451 DB assertions, prior full 65-pass browser matrix plus targeted Platform 2/2, 62 unit assertions, scoped Realtime/resync/reconnect, repository-backed role apps, financial closure, WCAG automation, 320px layouts, local Storage backup/restore, 30-request load burst and portable schema restore evidence; fresh full browser matrix, manual devices, final UI review and app-Staging evidence remain |
 
 ## UI Foundation Gate
 
@@ -41,9 +41,9 @@ The UI Architecture Impact Warning remains active: visual/token/layout changes a
 
 ## Remaining external gates
 
-- Full `Verified in Staging` still requires the newest migrations/UI to pass the complete local matrix, be pushed within the reviewed migration-RLS scope, and pass a fresh Preview Golden Path. The earlier Preview baseline is verified but predates the newest local slices.
+- Full `Verified in Staging` still requires the newest migration set to be pushed within the reviewed migration-RLS scope and a fresh Preview Golden Path. The complete local matrix now passes; the earlier Preview baseline predates the newest local slices.
 - Pilot validation requires owner-approved participants, device/Wi-Fi model and operational inputs.
 
 ## Next actions
 
-Continue authorized local work with M10 manual accessibility/device/visual/load and operational backup evidence. For Vercel, obtain exact authorization to create and retain one inert first-deployment Production bootstrap with domain assignment disabled; then deploy the real app as Preview and require `inspect.target=preview` before browser verification. Keep Finish Line A `NOT_MET` until all local and hosted acceptance evidence exists.
+Continue authorized local work with remaining M3/M9 setup/reporting/i18n scope and M10 manual accessibility/device/visual/load/operational evidence. Then push only reviewed migrations to the named Staging Supabase project and deploy only a real Preview, requiring `inspect.target=preview`. Keep Finish Line A `NOT_MET` until all local and hosted acceptance evidence exists.

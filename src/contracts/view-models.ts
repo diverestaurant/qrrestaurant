@@ -19,6 +19,10 @@ export type KdsQueueView = ViewState & { stationKey: string; stationName: string
 export type StaffContextView = ViewState & { role: "OWNER" | "MANAGER" | "KITCHEN" | "WAITER" | "CASHIER" | "PLATFORM"; branchId: string; capabilities: string[] };
 export type AdminOverviewView = {
   branchName: string;
+  settings: {
+    restaurant: { name: string; defaultCurrency: string; defaultTimezone: string; version: number; legalName: string; registrationNumber: string; taxRegistrationNumber: string; contactPhone: string; contactEmail: string; brandAccent: string; receiptFooter: string; settingsVersion: number };
+    branch: { name: string; currency: string; timezone: string; businessDayCutoff: string; version: number; defaultLocale: "en" | "zh" | "ms"; addressLine1: string; addressLine2: string; city: string; postalCode: string; countryCode: string; contactPhone: string; contactEmail: string; settingsVersion: number };
+  };
   menuItems: number;
   menu: Array<{ id: string; categoryId: string; name: string; description: string; basePriceMinor: number; currency: string; stationKey: string; visible: boolean; available: boolean; sortOrder: number; featured: boolean; spiceLevel: number; taxEligible: boolean; serviceEligible: boolean; operatingRules: Record<string, unknown>; imagePath: string; imageAlt: string; version: number; variants: Array<{ id: string; name: string; priceDeltaMinor: number; active: boolean; sortOrder: number; version: number }> }>;
   categories: Array<{ id: string; name: string; sortOrder: number; visible: boolean; version: number }>;

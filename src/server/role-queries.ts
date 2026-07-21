@@ -48,6 +48,6 @@ export async function readCashierPage(branchId: string, sessionId?: string) {
   return readLocalCashierBoard(branchId, sessionId);
 }
 
-export async function readAdminPage(branchId: string) {
-  return readLocalAdminOverview(branchId);
+export async function readAdminPage(branchId: string, restaurantId: string) {
+  return readLocalAdminOverview(branchId, restaurantId);
 }

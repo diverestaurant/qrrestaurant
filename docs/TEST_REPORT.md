@@ -5,8 +5,8 @@
 - `npm run lint` and `npm run typecheck`: PASS.
 - `npm test`: PASS, 22 files / 62 tests.
 - `npx next build --webpack`: PASS on Next.js 16.2.10. Default Turbopack cannot bind its internal sandbox port in this environment; the official Webpack build path provides the production compilation evidence.
-- Local database runtime baseline through migration `20260721143000`: PASS, 21 pgTAP files / 263 assertions.
-- Migrations `20260721144000`–`20260721148000` and their pgTAP suites are not yet runtime-verified. `supabase db reset` currently stops before migration execution because sandbox access to `/Users/oscar/.docker/run/docker.sock` is denied.
+- Local database clean reset through migration `20260721152000`: PASS, 29 pgTAP files / 451 assertions.
+- Last complete `npm run test:e2e`: PASS, 65 passed / 21 expected role skips / zero failures. Targeted Platform tenant authorization/idempotency/lifecycle/subscription UI: PASS, 2/2 after the latest changes; a fresh full matrix remains queued.
 - Prior hosted Vercel evidence: inert bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN`; real app Preview `dpl_9ZDvXRQqKjARWiVyiZ386sZszuNn`, `READY`, `inspect.target=preview`. This Preview predates the newest local slices and must be refreshed after database verification.
 
 Report date: 2026-07-21  
@@ -21,9 +21,9 @@ M0–M2 foundation: **TESTED LOCALLY**. M3 local Session adapters, M4 menu read/
 
 - `npm run lint` — pass.
 - `npm run typecheck` — pass.
-- `npm test` — pass; 15 test files / 43 tests at the current checkpoint, including freshness-state presentation and Realtime event reconciliation contracts.
+- `npm test` — pass; 22 test files / 62 tests at the current checkpoint.
 - `npm run build` — pass with Next.js static route generation.
-- `npm run test:e2e` — pass; 58 passed with 16 expected role-specific skips across customer-mobile and staff-desktop projects. This includes synthetic customer QR entry/Join Code/cart/order/tracking/service-request and variant/modifier configuration UI, repository-backed KDS/Waiter/Cashier/Admin snapshots, synthetic staff menu/Session/order/service/KDS/payment success+replay, discount/multi-tender/receipt/close recovery, authorized report read, branch-scoped Storage upload/download/delete, local customer/staff Realtime notification and authoritative resync, a synthetic 30-request menu read burst with p95 under the local 3-second smoke budget, menu/Session/payment/report authentication boundaries, all role surfaces at 320px, keyboard focus/action-name checks and browser offline → online recovery. Browser workers are serialized because deterministic synthetic IDs are intentionally shared; DB concurrency is covered separately.
+- `npm run test:e2e` — prior full matrix passes 65 with 21 expected role-specific skips and zero failures; latest targeted Platform flow passes 2/2, including unauthenticated rejection, deterministic replay, data-preserving suspend/reactivate, manual subscription tracking and UI command serialization.
 - `agent-browser` CLI was unavailable locally, so Playwright was used as the browser-verification fallback. This is recorded as a tooling limitation, not remote evidence.
 
 ## Database evidence
@@ -31,7 +31,7 @@ M0–M2 foundation: **TESTED LOCALLY**. M3 local Session adapters, M4 menu read/
 - Local Supabase reset applies both migrations and synthetic seed data.
 - App-owned `public` schema lint passes with `--fail-on error`.
 - Local security advisors pass with `--fail-on error`.
-- Local pgTAP suites pass: 179/179 across seventeen SQL files, including public menu/table-entry grants/policies, variant/modifier publication and authoritative snapshots, private Storage bucket limits and branch-scoped image policies, menu availability audit/outbox trigger, authoritative order totals, discounts, payment-begin/multi-tender, receipt/reprint/reconciliation/close, server-only staff repository privileges, customer/staff Realtime publication, synthetic staff/anonymous RLS, cashier payment confirmation/allocation, report tenant isolation, grant-bound server pricing/order snapshots, explicit server-only idempotency/membership privileges and concurrency/invalid-command hardening.
+- Local pgTAP suites pass: 451/451 across 29 SQL files, including public entry, menu configuration/snapshots, Storage policy, KDS/waiter/service recovery, financial closure, settings, operations/reconciliation reports, Platform tenant lifecycle, suspended-tenant denial, invitations, Realtime publication, cross-tenant RLS, server-role grants and concurrency hardening.
 - Unauthenticated `POST /api/v1/staff/menu/items/:id/availability` returns 401 before any write.
 - Read-only catalog/data check confirms seeded tenant/menu rows plus explicit public/authenticated grants.
 - A local schema-only portable dump of `public`, `app_private` and `auth` restored into an isolated temporary database; 28 public tables, 50 public policies and 28 RLS-enabled public tables were verified before the temporary database was removed. A public-only dump was intentionally rejected because it omitted the app-owned helper schema.

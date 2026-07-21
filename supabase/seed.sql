@@ -6,6 +6,18 @@ insert into public.branches (id, restaurant_id, slug, name, status, currency, ti
 values ('00000000-0000-4000-8000-000000000002', '00000000-0000-4000-8000-000000000001', 'main', 'DIVE Demo Branch', 'ACTIVE', 'MYR', 'Asia/Kuching')
 on conflict (id) do nothing;
 
+insert into public.restaurant_settings (id, restaurant_id, brand_accent, receipt_footer)
+values ('00000000-0000-4000-8000-000000000003', '00000000-0000-4000-8000-000000000001', '#0F766E', 'Thank you for dining with us.')
+on conflict (restaurant_id) do nothing;
+
+insert into public.branch_settings (id, restaurant_id, branch_id, default_locale, country_code)
+values ('00000000-0000-4000-8000-000000000004', '00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002', 'en', 'MY')
+on conflict (branch_id) do nothing;
+
+insert into public.subscriptions (id, restaurant_id, plan_key, status)
+values ('00000000-0000-4000-8000-000000000005', '00000000-0000-4000-8000-000000000001', 'MANUAL_V1', 'TRIAL')
+on conflict (restaurant_id) do nothing;
+
 insert into public.roles (id, role_key, display_name, scope)
 values
   ('00000000-0000-4000-8000-000000000101', 'PLATFORM', 'Platform Admin', 'PLATFORM'),

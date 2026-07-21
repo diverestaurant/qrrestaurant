@@ -8,11 +8,12 @@ import { getServerSupabaseClient } from "@/server/supabase/server";
 type MembershipRow = { branch_id: string | null; restaurant_id: string; role_id: string; status: string };
 type RolePermissionRow = { permission_id: string; role_id: string };
 type PermissionRow = { id: string; permission_key: string };
+type RoleRow = { id: string; role_key: string };
 
 export type StaffPageAccess =
   | { status: "signed_out" }
   | { email: string; status: "forbidden" }
-  | { email: string; status: "authorized" };
+  | { email: string; roleKeys: string[]; status: "authorized" };
 
 export async function authorizeStaffPage(input: {
   branchId: string;
@@ -56,6 +57,9 @@ export async function authorizeStaffPage(input: {
     const permissionKey = permissionById.get(permission.permission_id);
     return permissionKey ? [{ roleId: permission.role_id, permissionKey }] : [];
   });
+  const rolesResult = await supabase.from("roles").select("id,role_key").in("id", scopedRoleIds);
+  if (rolesResult.error) throw new AppError("INTERNAL_ERROR", "Unable to verify staff roles.", true);
+  const roleKeys = ((rolesResult.data ?? []) as RoleRow[]).map((role) => role.role_key);
 
   return hasStaffPageAccess({
     branchId: input.branchId,
@@ -65,6 +69,6 @@ export async function authorizeStaffPage(input: {
     requiredCapabilities: input.requiredCapabilities,
     restaurantId: input.restaurantId,
   })
-    ? { status: "authorized", email }
+    ? { status: "authorized", email, roleKeys }
     : { status: "forbidden", email };
 }

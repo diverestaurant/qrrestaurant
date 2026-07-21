@@ -27,7 +27,7 @@ function databaseError(error: { code?: string; message?: string } | null, fallba
   if (error?.code === "P0002") throw new AppError("NOT_FOUND", error.message ?? "The Admin record was not found.");
   if (error?.code === "P0003") throw new AppError("STALE_STATE", error.message ?? "The record changed. Refresh before saving.", true);
   if (error?.code === "P0001") throw new AppError("CONFLICT", error.message ?? "The Admin command conflicts with the current state.");
-  if (["22023", "22P02", "23503", "23514"].includes(error?.code ?? "")) throw new AppError("VALIDATION_ERROR", error?.message ?? "The Admin command fields are invalid.");
+  if (["22007", "22023", "22P02", "23503", "23514"].includes(error?.code ?? "")) throw new AppError("VALIDATION_ERROR", error?.message ?? "The Admin command fields are invalid.");
   if (error?.code === "23505") throw new AppError("CONFLICT", "A record with the same unique value already exists.");
   throw new AppError("INTERNAL_ERROR", fallback, true);
 }
@@ -53,6 +53,7 @@ const menuStructureTypes = new Set<AdminCommand["type"]>([
   "menu_modifier_option.upsert",
   "menu_modifier_link.set",
 ]);
+const settingsTypes = new Set<AdminCommand["type"]>(["restaurant.settings.update", "branch.settings.update"]);
 
 export async function POST(request: Request) {
   const requestId = correlationId();
@@ -89,7 +90,8 @@ export async function POST(request: Request) {
         return { tableId: row.table_id, tokenVersion: row.token_version, tableToken: token };
       }
 
-      const result = await supabase.rpc(menuStructureTypes.has(command.type) ? "execute_menu_structure_command" : "execute_admin_command", {
+      const commandFunction = settingsTypes.has(command.type) ? "execute_settings_command" : menuStructureTypes.has(command.type) ? "execute_menu_structure_command" : "execute_admin_command";
+      const result = await supabase.rpc(commandFunction, {
         p_restaurant_id: command.restaurantId,
         p_branch_id: command.branchId,
         p_command: commandForDatabase(command),

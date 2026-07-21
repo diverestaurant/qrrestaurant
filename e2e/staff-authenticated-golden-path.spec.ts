@@ -10,6 +10,8 @@ const baseUrl = "http://127.0.0.1:3000";
 const branchId = "00000000-0000-4000-8000-000000000002";
 const restaurantId = "00000000-0000-4000-8000-000000000001";
 const managerRoleId = "00000000-0000-4000-8000-000000000103";
+const ownerRoleId = "00000000-0000-4000-8000-000000000102";
+const platformRoleId = "00000000-0000-4000-8000-000000000101";
 const kitchenRoleId = "00000000-0000-4000-8000-000000000104";
 const menuItemId = "00000000-0000-4000-8000-000000000403";
 const tableId = "00000000-0000-4000-8000-000000000601";
@@ -193,6 +195,13 @@ test("synthetic manager can read a branch summary through the authorized report 
   expect(report.body.meta.freshness).toBe("fresh");
   expect(report.body.data.branchId).toBe(adminBranchId);
   expect(report.body.data.branchName).toBe("DIVE Demo Branch");
+  const today = new Date().toISOString().slice(0, 10);
+  const operations = await getJson(page, `/api/v1/staff/reports/operations?branchId=${adminBranchId}&from=${today}&to=${today}`);
+  expect(operations.status).toBe(200);
+  expect(operations.body.ok).toBe(true);
+  expect(operations.body.data).toMatchObject({ branchId: adminBranchId, branchName: "DIVE Demo Branch", timezone: "Asia/Kuching", currency: "MYR" });
+  expect(operations.body.data.orders).toBeGreaterThanOrEqual(1);
+  expect(operations.body.data.reconciliationExceptions).toBeInstanceOf(Array);
 });
 
 test("staff sign-in form refreshes into an authorized server snapshot", async ({ page }) => {
@@ -233,6 +242,9 @@ test("synthetic manager can operate the KDS, waiter and admin UI gates", async (
   await expect(page.getByRole("button", { name: /Mark (available|sold out)/ }).first()).toBeVisible();
   await page.getByRole("button", { name: "Load branch report" }).click();
   await expect(page.getByText(/active tables/)).toBeVisible();
+  await page.getByRole("button", { name: "Load operations report" }).click();
+  await expect(page.getByLabel("Operations report")).toBeVisible();
+  await expect(page.getByText(/Asia\/Kuching · MYR/)).toBeVisible();
 
   await page.goto("/cashier");
   await expect(page.getByText(/Signed in as/)).toBeVisible();
@@ -302,6 +314,104 @@ test("Admin UI commits menu, table, QR, station and feature-flag operations", as
     await account.admin.from("menu_categories").delete().eq("branch_id", branchId).eq("name", categoryName);
     await account.admin.from("kitchen_stations").delete().eq("branch_id", branchId).eq("station_key", stationKey);
     await account.admin.from("feature_flags").delete().eq("branch_id", branchId).eq("flag_key", flagKey);
+    await account.admin.auth.admin.deleteUser(account.userId);
+  }
+});
+
+test("Owner UI commits and restores Restaurant and Branch settings", async ({ page }) => {
+  await page.goto("/");
+  const account = await signInSyntheticStaff(page, ownerRoleId);
+  const [restaurant, restaurantSettings, branch, branchSettings] = await Promise.all([
+    account.admin.from("restaurants").select("name,default_currency,default_timezone,version").eq("id", restaurantId).single(),
+    account.admin.from("restaurant_settings").select("legal_name,registration_number,tax_registration_number,contact_phone,contact_email,brand_accent,receipt_footer,version").eq("restaurant_id", restaurantId).single(),
+    account.admin.from("branches").select("name,currency,timezone,business_day_cutoff,version").eq("id", branchId).single(),
+    account.admin.from("branch_settings").select("default_locale,address_line_1,address_line_2,city,postal_code,country_code,contact_phone,contact_email,version").eq("branch_id", branchId).single(),
+  ]);
+  if (restaurant.error || restaurantSettings.error || branch.error || branchSettings.error) throw restaurant.error ?? restaurantSettings.error ?? branch.error ?? branchSettings.error;
+
+  try {
+    await page.goto("/admin");
+    await expect(page.getByRole("group", { name: "Restaurant profile · Owner only" })).toBeEnabled();
+    await page.getByLabel("Legal name").fill("Synthetic Owner Verification");
+    await page.getByLabel("Receipt footer").fill("Synthetic owner receipt footer");
+    await page.getByRole("button", { name: "Save Restaurant profile" }).click();
+    await expect.poll(async () => {
+      const result = await account.admin.from("restaurant_settings").select("legal_name,receipt_footer").eq("restaurant_id", restaurantId).single();
+      return result.data;
+    }).toEqual({ legal_name: "Synthetic Owner Verification", receipt_footer: "Synthetic owner receipt footer" });
+
+    const branchSettingsGroup = page.getByRole("group", { name: "Branch operations" });
+    await branchSettingsGroup.getByLabel("Address line 1").fill("Synthetic branch address");
+    await branchSettingsGroup.getByLabel("City", { exact: true }).fill("Synthetic Kuching");
+    await branchSettingsGroup.getByRole("button", { name: "Save Branch settings" }).click();
+    await expect.poll(async () => {
+      const result = await account.admin.from("branch_settings").select("address_line_1,city").eq("branch_id", branchId).single();
+      return result.data;
+    }).toEqual({ address_line_1: "Synthetic branch address", city: "Synthetic Kuching" });
+  } finally {
+    const [currentRestaurant, currentRestaurantSettings, currentBranch, currentBranchSettings] = await Promise.all([
+      account.admin.from("restaurants").select("version").eq("id", restaurantId).single(),
+      account.admin.from("restaurant_settings").select("version").eq("restaurant_id", restaurantId).single(),
+      account.admin.from("branches").select("version").eq("id", branchId).single(),
+      account.admin.from("branch_settings").select("version").eq("branch_id", branchId).single(),
+    ]);
+    if (currentRestaurant.data && currentRestaurantSettings.data && (currentRestaurant.data.version !== restaurant.data.version || currentRestaurantSettings.data.version !== restaurantSettings.data.version)) {
+      await apiJson(page, "/api/v1/staff/admin/commands", { method: "POST", body: { type: "restaurant.settings.update", restaurantId, branchId, idempotencyKey: randomUUID(), expectedRestaurantVersion: currentRestaurant.data.version, expectedSettingsVersion: currentRestaurantSettings.data.version, name: restaurant.data.name, defaultCurrency: restaurant.data.default_currency, defaultTimezone: restaurant.data.default_timezone, legalName: restaurantSettings.data.legal_name ?? "", registrationNumber: restaurantSettings.data.registration_number ?? "", taxRegistrationNumber: restaurantSettings.data.tax_registration_number ?? "", contactPhone: restaurantSettings.data.contact_phone ?? "", contactEmail: restaurantSettings.data.contact_email ?? "", brandAccent: restaurantSettings.data.brand_accent ?? "#0F766E", receiptFooter: restaurantSettings.data.receipt_footer ?? "" } });
+    }
+    if (currentBranch.data && currentBranchSettings.data && (currentBranch.data.version !== branch.data.version || currentBranchSettings.data.version !== branchSettings.data.version)) {
+      await apiJson(page, "/api/v1/staff/admin/commands", { method: "POST", body: { type: "branch.settings.update", restaurantId, branchId, idempotencyKey: randomUUID(), expectedBranchVersion: currentBranch.data.version, expectedSettingsVersion: currentBranchSettings.data.version, name: branch.data.name, currency: branch.data.currency, timezone: branch.data.timezone, businessDayCutoff: String(branch.data.business_day_cutoff).slice(0, 5), defaultLocale: branchSettings.data.default_locale, addressLine1: branchSettings.data.address_line_1 ?? "", addressLine2: branchSettings.data.address_line_2 ?? "", city: branchSettings.data.city ?? "", postalCode: branchSettings.data.postal_code ?? "", countryCode: branchSettings.data.country_code, contactPhone: branchSettings.data.contact_phone ?? "", contactEmail: branchSettings.data.contact_email ?? "" } });
+    }
+    await account.admin.auth.admin.deleteUser(account.userId);
+  }
+});
+
+test("Platform UI creates, replays, suspends and reactivates an isolated tenant", async ({ page }) => {
+  await page.goto("/");
+  const account = await signInSyntheticStaff(page, platformRoleId);
+  const suffix = randomUUID().slice(0, 8);
+  const tenantName = `Synthetic Platform ${suffix}`;
+  const createCommand = {
+    type: "platform.restaurant.create",
+    name: tenantName,
+    slug: `synthetic-platform-${suffix}`,
+    defaultCurrency: "MYR",
+    defaultTimezone: "Asia/Kuching",
+    branchName: `Synthetic Branch ${suffix}`,
+    branchSlug: "main",
+    planKey: "MANUAL_V1",
+    idempotencyKey: randomUUID(),
+  };
+
+  try {
+    const first = await apiJson(page, "/api/v1/platform/tenants", { method: "POST", body: createCommand });
+    expect(first.status).toBe(201);
+    expect(first.body.meta.replay).toBe(false);
+    expect(first.body.data.version).toBe(1);
+
+    const replay = await apiJson(page, "/api/v1/platform/tenants", { method: "POST", body: createCommand });
+    expect(replay.status).toBe(200);
+    expect(replay.body.meta.replay).toBe(true);
+    expect(replay.body.data).toEqual(first.body.data);
+
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { name: "Restaurant lifecycle and manual subscription tracking" })).toBeVisible();
+    await page.getByRole("button", { name: "Load platform tenants" }).click();
+    const tenant = page.locator("article").filter({ has: page.getByRole("heading", { name: tenantName, exact: true }) });
+    const tenantStatus = tenant.getByLabel(`${tenantName} tenant status`);
+    await expect(tenantStatus).toHaveText("ACTIVE");
+    await tenant.getByRole("button", { name: "Suspend access" }).click();
+    await expect(tenantStatus).toHaveText("SUSPENDED");
+    await tenant.getByRole("button", { name: "Reactivate access" }).click();
+    await expect(tenantStatus).toHaveText("ACTIVE");
+    await tenant.getByLabel("Manual plan key").fill("E2E_MANUAL");
+    await tenant.getByLabel("Subscription status").selectOption("ACTIVE");
+    await tenant.getByRole("button", { name: "Save tracking" }).click();
+    await expect.poll(async () => {
+      const catalog = await getJson(page, "/api/v1/platform/tenants");
+      expect(catalog.status).toBe(200);
+      return catalog.body.data.find((entry: { restaurantId: string }) => entry.restaurantId === first.body.data.restaurantId);
+    }).toMatchObject({ restaurantId: first.body.data.restaurantId, status: "ACTIVE", subscription: { planKey: "E2E_MANUAL", status: "ACTIVE", version: 4 } });
+  } finally {
     await account.admin.auth.admin.deleteUser(account.userId);
   }
 });

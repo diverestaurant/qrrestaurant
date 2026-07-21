@@ -61,7 +61,7 @@ select set_config('request.jwt.claims', json_build_object('sub', '00000000-0000-
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000009931', true);
 select throws_ok(
   $$select * from public.create_staff_membership_from_invite('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-000000000002','00000000-0000-4000-8000-000000009933','00000000-0000-4000-8000-000000000105')$$,
-  '22023', 'The Restaurant and Branch must be active.', 'suspended Branch rejects new memberships'
+  '42501', 'Staff management permission is required.', 'suspended Branch rejects new memberships without disclosing tenant state'
 );
 
 select * from finish();

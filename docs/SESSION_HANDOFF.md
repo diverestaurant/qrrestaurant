@@ -5,13 +5,13 @@ Execution mode: `BUILD` + authorized `STAGING_VERIFY` database and Vercel stagin
 Authorized path: `/Users/oscar/Documents/QR restaurant odering system`  
 External scope: named Staging Supabase migration/RLS/index/constraint/synthetic-seed/verification plus named `dive restaurant` Vercel Staging link/configure/deploy/verify; no Production or unrelated external project
 
-## Checkpoint 4/7 — continue, do not restart
+## Checkpoint 4/7 committed — step 5/7 in progress, do not restart
 
 The retained Vercel initialization state is resolved: inert 448-byte Production bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN` remains, and real application Preview `dpl_9ZDvXRQqKjARWiVyiZ386sZszuNn` was `READY` with `inspect.target=preview`. Never deploy or promote the real app to Production.
 
-Local work after that Preview adds migrations `20260721140000`–`20260721148000`, complete menu Admin, KDS recovery, guarded service requests, waiter handoff/cleaning, customer menu Realtime/operating-window/cart reconciliation and staff invitation/password onboarding. Lint/typecheck, 22 Vitest files / 62 tests and Webpack production build pass. Database runtime evidence passes through migration `20260721143000` at 21 pgTAP files / 263 assertions; newer migrations await Docker-capable reset/pgTAP. The current sandbox denial is `operation not permitted` on the Docker socket, before any new migration runs.
+Local work after that Preview now extends through migration `20260721152000`: complete menu Admin, KDS/waiter recovery, Restaurant/Branch settings, bounded operations/reconciliation reports and Platform-only tenant lifecycle/manual subscription tracking. Lint/typecheck, 22 Vitest files / 62 tests and Webpack production build pass. The prior complete Playwright matrix is 65 pass / 21 expected skips / zero failures; the latest Platform slice adds targeted 2/2. A clean reset applies all 29 migrations and 451/451 pgTAP assertions pass.
 
-Resume at plan step 4/7: continue safe local M3–M10/M11 gaps and static/source verification. When Docker or external execution becomes available, run reset/pgTAP before presenting the migration order/risk summary and pushing to Staging; then deploy the newest app to Preview and rerun the hosted Golden Path.
+Resume inside plan step 5/7: Restaurant/Branch settings, operations/reconciliation reports and Platform lifecycle are complete locally. Continue branch lifecycle, staff self-profile, printable QR/receipt and i18n architecture, then the fresh full matrix, M10 manual/visual/operational evidence and reviewed Staging/Preview rehearsal.
 
 ## Current state
 
@@ -45,9 +45,9 @@ M0–M2 are implemented and tested locally. M3 Session adapters, M4 menu read/mu
 
 ## Verified locally
 
-- Lint, strict typecheck, 15 unit test files / 43 tests and Next.js build pass.
-- `npm run test:e2e` passes 58 with 16 expected role-specific skips across customer-mobile and staff-desktop against the local dev server, including synthetic customer QR entry/Join Code/cart/order/tracking/service-request and variant/modifier configuration UI, repository-backed KDS/Waiter/Cashier/Admin snapshots, staff menu/Session/order/service/KDS/payment success+replay, discount/multi-tender/receipt/close recovery, report read, branch-scoped Storage upload/download/delete, customer/staff Realtime notification and authoritative resync, a synthetic 30-request menu read burst, menu/Session/payment/report boundaries, all role surfaces at 320px, keyboard/action-name checks and browser offline → online recovery. `agent-browser` was unavailable, so this is the documented fallback.
-- Local Supabase reset, app-owned schema lint, security advisors and 179 pgTAP assertions pass across seventeen SQL files, including public table entry, variant/modifier publication and snapshots, private Storage bucket/policy metadata, authoritative order totals, discount/payment-begin/multi-tender/receipt/reconciliation/close, server-only staff repository privileges, customer/staff Realtime publication, manager/outsider/anonymous/cashier/order RLS, Session open/join RPCs, payment allocation, report tenant isolation, order snapshots, explicit server-only idempotency/membership access and concurrency hardening.
+- Lint, strict typecheck, 22 unit test files / 62 tests and Next.js production Webpack build pass after the latest Platform UI concurrency hardening.
+- `npm run test:e2e` passes 65 with 21 expected role-specific skips and zero failures across customer-mobile and staff-desktop, including all repository-backed role workflows, financial closure, WCAG automation, 320px layouts, Realtime resync, offline recovery, load smoke and Storage backup/restore.
+- Local Supabase clean reset applies 29 migrations and 451 pgTAP assertions pass across 29 SQL files, including RLS/tenant isolation, QR/session/menu/order/KDS/waiter/payment/settings/report/Platform/invitation/Realtime and concurrency boundaries.
 - Authorized Staging Supabase verification passes: 16/16 migration history, 29 public tables with RLS, 52 policies, 8 Realtime publication tables, zero anon sensitive privileges, zero tenant-scope gaps and zero orphan/duplicate integrity findings after synthetic seed.
 - Only the named Staging Supabase project was modified within the explicit migration/RLS/index/constraint/synthetic-seed scope. The authorized Vercel project was linked and Preview variables were configured. All three accidental first-deployment Production candidates were deleted, and Vercel now reports no deployments. No unrelated project was accessed.
 
@@ -57,8 +57,9 @@ Subagent **Peirce** completed the required read-only UI Foundation review. Resul
 
 ## Next work
 
-1. M10: continue manual screen-reader/device/usability, visual regression, representative load, provider/operational backup and final review evidence; local object and schema restore drills are evidenced.
-2. Obtain exact authorization to create and retain one inert 448-byte first-deployment Production bootstrap with domain assignment disabled. Then deploy the real app as Preview, require `inspect.target=preview`, and run app-level browser Golden Path verification; do not promote the app or operate any other Production resource.
+1. Step 5/7: implement remaining branch lifecycle, staff self-profile, printable QR/receipt and i18n architecture; settings, Platform lifecycle and operations/reconciliation are complete locally.
+2. Continue M10 manual screen-reader/device/usability, visual regression, representative load, provider/operational backup and final review evidence; local object and schema restore drills are evidenced.
+3. Push only reviewed migrations to the named Staging project, deploy only a real Preview, require `inspect.target=preview`, and run the hosted Golden Path; never promote the app to Production.
 
 ## Do not claim yet
 

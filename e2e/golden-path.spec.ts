@@ -144,6 +144,22 @@ test("branch report rejects unauthenticated reads", async ({ request }) => {
   expect(body.error.code).toBe("UNAUTHORIZED");
 });
 
+test("operations report rejects unauthenticated reads", async ({ request }) => {
+  const response = await request.get("/api/v1/staff/reports/operations?branchId=00000000-0000-4000-8000-000000000002&from=2026-07-21&to=2026-07-21");
+  expect(response.status()).toBe(401);
+  const body = await response.json();
+  expect(body.ok).toBe(false);
+  expect(body.error.code).toBe("UNAUTHORIZED");
+});
+
+test("Platform tenant boundary rejects unauthenticated reads", async ({ request }) => {
+  const response = await request.get("/api/v1/platform/tenants");
+  expect(response.status()).toBe(401);
+  const body = await response.json();
+  expect(body.ok).toBe(false);
+  expect(body.error.code).toBe("UNAUTHORIZED");
+});
+
 test("customer order submission rejects unauthenticated commands", async ({ request }) => {
   const response = await request.post("/api/v1/customer/orders", { data: { sessionId: "00000000-0000-4000-8000-000000009912", items: [{ menuItemId: "00000000-0000-4000-8000-000000000401", quantity: 1, modifierOptionIds: [] }], idempotencyKey: "00000000-0000-4000-8000-000000000903", expectedSessionVersion: 1 } });
   expect(response.status()).toBe(401);
