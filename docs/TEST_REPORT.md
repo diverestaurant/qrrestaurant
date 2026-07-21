@@ -49,7 +49,7 @@ The browser matrix covers customer join/order/replay/tracking/service requests a
 ## Current Preview evidence
 
 - Vercel deployment `dpl_Cio3RFsqiFndX7nD4SjwHQoJLvgN` is `READY` with `target=preview` and build output present. A logged-in Chrome session verified the hosted landing page and Supabase-synced customer menu (`Char Kway Teow`, `Nasi Lemak DIVE`), opened the variant/modifier dialog, selected `Extra spicy` and `Fried egg`, and observed the authoritative estimate update to `RM 19.80` without submitting an order.
-- The same session verified `/kds`, `/waiter`, `/cashier` and `/admin` render their protected staff sign-in boundaries with disabled sign-in until credentials are entered. No real credentials, payments or business mutations were used. Direct browser navigation to `/api/health` returned `ERR_BLOCKED_BY_CLIENT`; this endpoint is not marked passed by hosted evidence.
+- The same session verified `/kds`, `/waiter`, `/cashier` and `/admin` render their protected staff sign-in boundaries with disabled sign-in until credentials are entered. The customer route displayed `App reachable` / `Authoritative refresh available` from the app's own `/api/health` liveness fetch. No real credentials, payments or business mutations were used. Direct browser navigation to `/api/health` returned `ERR_BLOCKED_BY_CLIENT`, so direct endpoint transport/readiness evidence is not claimed.
 
 ## Historical Staging/Preview evidence
 

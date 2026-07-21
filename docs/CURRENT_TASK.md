@@ -39,7 +39,7 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 3. Use the reviewed migration order/risk record already shown in this handoff; no seed, reset or delete was used.
 4. Verify migration history, RLS coverage, grants, Realtime publication and basic data integrity on the named Staging project — complete for schema/RLS scope.
 5. Verify the current Preview `dpl_Cio3RFsqiFndX7nD4SjwHQoJLvgN` is `READY` with `target=preview`, then run hosted public/customer/staff-boundary smoke — complete for route scope.
-6. Resolve the remaining hosted health/transactional/operational evidence without submitting real orders or using real credentials; the browser `/api/health` navigation was blocked by `ERR_BLOCKED_BY_CLIENT`.
+6. Resolve the remaining direct health/readiness, transactional and operational evidence without submitting real orders or using real credentials; the customer route liveness banner passed, while direct `/api/health` navigation was blocked by `ERR_BLOCKED_BY_CLIENT`.
 7. Continue M10/M11 manual device/screen-reader/usability, hosted backup/restore/observability and release-input evidence.
 
 ## Boundaries
