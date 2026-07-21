@@ -36,3 +36,4 @@ npm run test:e2e:fresh
 The `*:fresh` commands explicitly reset only the local synthetic Supabase database before a stateful suite. They never use `--linked` and must not be pointed at a remote URL.
 
 The current evidence and remaining gates are recorded in [`docs/TEST_REPORT.md`](docs/TEST_REPORT.md) and [`docs/SESSION_HANDOFF.md`](docs/SESSION_HANDOFF.md). The default local workflow does not connect to a remote project; remote actions require the named environment authorization recorded in the docs.
+# qrrestaurant
