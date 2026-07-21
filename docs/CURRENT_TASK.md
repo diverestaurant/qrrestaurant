@@ -34,12 +34,13 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 
 ## Next executable work
 
-1. Commit the current reviewed local slice and evidence.
-2. Show the pending migration order `20260721140000` through `20260721155000` and summarize additive/locking/security risks.
-3. Run linked Staging dry-run, then push only those migrations under the existing `migration-RLS` authorization; do not seed over existing data, reset or delete.
-4. Verify migration history, RLS coverage, cross-tenant isolation, grants, Realtime publication and basic data integrity on the named Staging project.
-5. Deploy the current app only to Vercel Preview, verify `inspect.target=preview`, run hosted health/public/customer/staff authorization Golden Paths and preserve the previous inert bootstrap.
-6. Continue M10/M11 manual device/screen-reader/usability, hosted backup/restore/observability and release-input evidence.
+1. Checkpoint `8d13585` preserves the current reviewed local source, tests and evidence with a clean worktree.
+2. Obtain refreshed current-session authorization accepted by the remote tool boundary; the previous attempt was denied against a stale `EXTERNAL_SCOPE=NONE` snapshot before any remote access.
+3. Show/confirm the pending migration order `20260721140000` through `20260721155000` and additive/locking/security risks.
+4. Run linked Staging dry-run, then push only those migrations; do not seed over existing data, reset or delete.
+5. Verify migration history, RLS coverage, cross-tenant isolation, grants, Realtime publication and basic data integrity on the named Staging project.
+6. Deploy the current app only to Vercel Preview, verify `inspect.target=preview`, run hosted health/public/customer/staff authorization Golden Paths and preserve the previous inert bootstrap.
+7. Continue M10/M11 manual device/screen-reader/usability, hosted backup/restore/observability and release-input evidence.
 
 ## Boundaries
 

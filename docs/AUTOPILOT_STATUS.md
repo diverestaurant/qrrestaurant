@@ -46,4 +46,4 @@ Step 5/7 is complete locally and step 6/7 is in progress. The complete current l
 
 ## Next action
 
-Create the local checkpoint, present the exact 16-migration order and risk summary, execute the authorized Staging dry-run/push/verification, then deploy and verify only a fresh Vercel Preview. Continue M10/M11 after hosted evidence; do not stop at the checkpoint.
+Checkpoint `8d13585` is complete. Obtain refreshed current-session authorization accepted by the remote tool boundary, then present/confirm the exact 16-migration order, execute the Staging dry-run/push/verification and deploy only a fresh Vercel Preview. Continue M10/M11 after hosted evidence; never use `--prod` or Promote for the real app.

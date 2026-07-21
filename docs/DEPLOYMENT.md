@@ -1,6 +1,6 @@
 # Deployment, Migration, Backup and Recovery Plan
 
-Status: Staging deployment authorized; project linked and Preview variables configured; provider-required first-deployment Production bootstrap awaits exact authorization before an app Preview can be created  
+Status: Named Staging/Preview targets are configured; current migrations and application still require a fresh authorized rehearsal
 Last updated: 2026-07-21
 
 ## 1. Authorization boundary
@@ -10,7 +10,7 @@ Last updated: 2026-07-21
 - Production changes: `RELEASE` with project/database/domain/commit/migration scope.
 - Pilot operations: `PILOT_VALIDATE`.
 
-The named Staging Supabase project is authorized and its migration/RLS verification is complete. Vercel team `dive-restaurant` and project `prj_JLBEMJVcJsR53G6uefmsVwARwgOL` are linked. The Hobby plan exposes only Production/Preview/Development and rejected creation of a custom `staging` target. Six encrypted variables remain configured for Preview. Three attempts to create the project's first deployment were classified Production despite Preview requests and were deleted. Official Vercel documentation confirms the first deployment of a new project is automatically marked Production; deleting every candidate therefore recreates the same empty-project condition. The safe bootstrap plan is one inert 448-byte static deployment with `--prod --skip-domain`, followed by the real app as Preview. It has not executed because exact Production-bootstrap authorization is required.
+The named Staging Supabase project contains the previously reviewed first 16 migrations; the 16 newer additive migrations through `20260721155000_staff_self_profile.sql` have not yet been applied there. Vercel team `dive-restaurant` and project `prj_JLBEMJVcJsR53G6uefmsVwARwgOL` are linked. The Hobby plan exposes only Production/Preview/Development and rejected creation of a custom `staging` target. Six encrypted variables remain configured for Preview. The explicitly authorized 448-byte inert bootstrap deployment `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN` is retained only to initialize the project and contains no application or Supabase credentials. Real application deployment `dpl_9ZDvXRQqKjARWiVyiZ386sZszuNn` was previously verified `READY` with `target=preview`; it predates the current migrations and application slices, so it is historical evidence rather than the current release candidate.
 
 ## 2. Environment isolation
 
@@ -119,4 +119,4 @@ Feature flag/traffic rollback, application rollback and database roll-forward ar
 
 Must include target, commit/artifact, migration, backups, tests, known issues, accepted risks, rollback, dashboards, alert contacts, training and support window.
 
-Current deployment status: Supabase Staging schema/RLS is verified; Vercel project is linked, Preview variables are configured and no deployment remains. Hosted Staging verification is blocked until the provider-required inert first-deployment Production bootstrap is explicitly authorized and retained, after which a confirmed Preview app deployment can be created.
+Current deployment status: the authorized inert bootstrap is retained and the prior real app Preview was confirmed as Preview. Finish Line A still requires the reviewed 16-migration Staging push and verification, followed by a fresh real-app Preview and hosted Golden Path. The real app must never use `--prod` or Promote; Production remains a separate `RELEASE` gate.

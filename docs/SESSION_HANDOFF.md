@@ -6,7 +6,7 @@ Execution: continue; do not restart or discard changes
 
 ## Resume point
 
-Step 5/7 is complete locally. Resume at step 6/7: checkpoint the current fully passing slice, then run the reviewed Staging Supabase migration/RLS rehearsal and a fresh Vercel Preview Golden Path. Do not stop after the commit or deploy the real app to Production.
+Step 5/7 is complete locally and checkpointed at `8d13585`. Resume at step 6/7: obtain refreshed current-session remote authorization, then run the reviewed Staging Supabase migration/RLS rehearsal and a fresh Vercel Preview Golden Path. Never deploy the real app to Production.
 
 ## Current local evidence
 
@@ -43,9 +43,9 @@ All prior Customer, KDS, Waiter, Cashier, Admin, pricing, multi-tender, receipt,
 
 ## Exact next sequence
 
-1. Safe Git checkpoint of current source/tests/docs.
-2. Present pending migration order and risk summary.
-3. Obtain a refreshed explicit Staging authorization because the remote tool reviewer rejected the first dry-run using a stale `EXTERNAL_SCOPE=NONE` snapshot; then run linked dry-run and apply only reviewed migrations with no seed overwrite/reset/delete.
+1. Checkpoint `8d13585` is complete and the worktree was clean immediately afterward.
+2. Obtain refreshed explicit Staging authorization because the remote tool reviewer rejected the first dry-run using a stale `EXTERNAL_SCOPE=NONE` snapshot before remote access.
+3. Present/confirm the pending migration order and risk summary, then run linked dry-run and apply only reviewed migrations with no seed overwrite/reset/delete.
 4. Verify remote migration history, all exposed tables RLS, grants, tenant isolation, Realtime publication and integrity.
 5. Deploy current app only as Vercel Preview; verify `inspect.target=preview` and hosted Golden Path.
 6. Continue M10/M11 manual accessibility/device/usability, hosted backup/restore/observability and owner-input gates.
