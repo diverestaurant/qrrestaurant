@@ -1,11 +1,11 @@
 # Autopilot Status
 
-Last updated: 2026-07-21
+Last updated: 2026-07-22
 Execution mode: `BUILD` plus authorized named Staging Supabase migration/RLS verification and named Vercel Preview deployment/verification
 Target Finish Line: A
 Production readiness: `NOT_MET`
 
-Step 5/7 is complete locally and step 6/7 is in progress. The complete current local automated matrix passes: lint, strict typecheck, local database lint, 25 Vitest files / 73 tests, production Webpack build, 31 pgTAP files / 508 assertions, and 85 passed Playwright checks with 27 expected cross-project skips and zero failures. Fresh stateful suites explicitly reset only local synthetic Supabase, then wait for Auth/REST readiness.
+Step 5/7 is complete locally and step 6/7 is in progress. The complete current local automated matrix passes: lint, strict typecheck, local database lint, 25 Vitest files / 73 tests, production Webpack build, 31 pgTAP files / 508 assertions, and 85 passed Playwright checks with 27 expected cross-project skips and zero failures. Fresh stateful suites explicitly reset only local synthetic Supabase, then wait for Auth/REST readiness. The current Vercel Preview is READY and its hosted public/staff-boundary route smoke now passes in the logged-in Chrome session.
 
 ## Delivery status
 
@@ -22,7 +22,7 @@ Step 5/7 is complete locally and step 6/7 is in progress. The complete current l
 | M8 | Complete locally | Tested Locally | discounts, multi-tender manual payment, receipts/reprint, close and reconciliation |
 | M9 | Complete locally | Tested Locally | full V1 Admin, Branch/Platform lifecycle, reports, audit viewer, flags, print and English-first i18n architecture |
 | M10 | In progress | Tested Locally (automated scope) | full automated matrix passes; manual screen-reader/device/usability and final independent review evidence remain |
-| M11 | In progress | Verified in Staging (schema/RLS scope) | all 32 migrations, linked DB lint, 33-table/57-policy/13-Realtime verification and security error gate pass; usable Preview, hosted operations and owner inputs remain |
+| M11 | In progress | Verified in Staging (schema/RLS scope) | all 32 migrations, linked DB lint, 33-table/57-policy/13-Realtime verification and security error gate pass; Preview route smoke passes, hosted transactional operations and owner inputs remain |
 | M12 | Not authorized | Designed | Production and Pilot require separate RELEASE/PILOT authorization |
 
 ## Latest completed slices
@@ -40,10 +40,10 @@ Step 5/7 is complete locally and step 6/7 is in progress. The complete current l
 ## External state and remaining gates
 
 - Staging Supabase `ztmftdjmtpwymfatmhjp` now has all 32 migrations through `20260721155000`; linked DB lint has no schema errors, all 33 public tables have RLS, 57 policies and 13 Realtime tables are present, 0 app SECURITY DEFINER functions lack an explicit search_path, and the security advisor error gate is clean. The sole unvalidated constraint is Supabase-managed `realtime.messages.messages_payload_exclusive` and is not an app migration defect.
-- Vercel project `prj_JLBEMJVcJsR53G6uefmsVwARwgOL` retains the inert bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN`. An unintended real-app Production deployment `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` is READY with Production aliases and must remain untouched until the owner explicitly authorizes exact remediation. Explicit Preview deployments `dpl_7cKdFjoyvvhBYeGChnXxtiTKKCtm` and `dpl_HnyyYCHyGUvjK1naNV8xf3jWLqxR` are BLOCKED because Vercel rejects the local Git author email; no usable current Preview exists.
+- Vercel project `prj_JLBEMJVcJsR53G6uefmsVwARwgOL` retains the inert bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN`. Current real-app Preview `dpl_Cio3RFsqiFndX7nD4SjwHQoJLvgN` is `READY`, `target=preview`, with build output present. Logged-in Chrome verified the hosted landing page, Supabase-synced customer menu, variant/modifier controls, and KDS/Waiter/Cashier/Admin staff-boundary routes. The direct `/api/health` browser navigation was blocked by the Chrome client (`ERR_BLOCKED_BY_CLIENT`) and is not treated as a passing endpoint check. An unintended real-app Production deployment `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` is READY with Production aliases and must remain untouched until the owner explicitly authorizes exact remediation. Earlier Preview attempts remain blocked historical evidence.
 - No real customer data, real payment, real password or paid service is used. Production remains out of scope.
 - Finish Line A still needs the newest Staging schema/app Golden Path plus manual/device/accessibility/operational evidence and the release-blocking client inputs tracked in `CLIENT_INPUT_REQUIRED.md`.
 
 ## Next action
 
-Staging migration/RLS verification is complete. Resolve the Vercel team-access identity gate, obtain explicit remediation authorization for the exact unintended Production deployment if deletion/rollback is desired, then deploy only with `--target=preview --skip-domain` and verify a READY Preview. Continue M10/M11 after hosted evidence; never use `--prod` or Promote for the real app.
+Staging migration/RLS verification and the current Preview route smoke are recorded. Continue M10/M11 with hosted transactional/operational evidence, manual device/screen-reader/usability review and owner-input gates. Keep the unintended Production deployment untouched; never use `--prod`, Promote or any Production mutation for the real app.

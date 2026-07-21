@@ -46,6 +46,11 @@ The browser matrix covers customer join/order/replay/tracking/service requests a
 - Post-migration linked DB lint reports no schema errors. Read-only verification found 33 public tables with zero RLS gaps, 57 public policies, 13 public Realtime tables, zero application `SECURITY DEFINER` functions without an explicit `search_path`, and the security advisor error gate reports no issues.
 - New tables `branch_settings`, `feature_flags`, `profiles` and `subscriptions` have RLS enabled, deny `anon` SELECT, allow intended `authenticated`/`service_role` SELECT. The two public tables without policies (`idempotency_keys`, `outbox_events`) are service-role-only protected tables. The sole unvalidated constraint is Supabase-managed `realtime.messages.messages_payload_exclusive`.
 
+## Current Preview evidence
+
+- Vercel deployment `dpl_Cio3RFsqiFndX7nD4SjwHQoJLvgN` is `READY` with `target=preview` and build output present. A logged-in Chrome session verified the hosted landing page and Supabase-synced customer menu (`Char Kway Teow`, `Nasi Lemak DIVE`), opened the variant/modifier dialog, selected `Extra spicy` and `Fried egg`, and observed the authoritative estimate update to `RM 19.80` without submitting an order.
+- The same session verified `/kds`, `/waiter`, `/cashier` and `/admin` render their protected staff sign-in boundaries with disabled sign-in until credentials are entered. No real credentials, payments or business mutations were used. Direct browser navigation to `/api/health` returned `ERR_BLOCKED_BY_CLIENT`; this endpoint is not marked passed by hosted evidence.
+
 ## Historical Staging/Preview evidence
 
 - The named Staging Supabase project previously matched the first 16 reviewed migrations and passed RLS/tenant/integrity checks with synthetic seed only.
@@ -61,7 +66,7 @@ The browser matrix covers customer join/order/replay/tracking/service requests a
 ## Remaining evidence
 
 - Reviewed push and verification of the 16 pending migrations on the named Staging project.
-- Fresh Vercel Preview and hosted Golden Path against the updated Staging schema.
+- Hosted transactional Golden Path and operational route checks against the updated Staging schema; route smoke is now recorded above, but transaction/health/ops evidence remains.
 - Manual screen-reader, real target-device/browser, glare/noise/print/usability review and final independent UI sign-off.
 - Hosted/provider backup/restore, observability/alert drill, agreed load model, operational owners and release-blocking business inputs.
 

@@ -1,6 +1,6 @@
 # Deployment, Migration, Backup and Recovery Plan
 
-Status: Staging schema/RLS rehearsal is verified; current Vercel Preview is blocked by team access and Production remediation is pending owner authorization
+Status: Staging schema/RLS rehearsal is verified; current Vercel Preview route smoke is verified and hosted transactional/operational evidence remains
 Last updated: 2026-07-21
 
 ## 1. Authorization boundary
@@ -10,7 +10,7 @@ Last updated: 2026-07-21
 - Production changes: `RELEASE` with project/database/domain/commit/migration scope.
 - Pilot operations: `PILOT_VALIDATE`.
 
-The named Staging Supabase project now contains all 32 reviewed migrations through `20260721155000_staff_self_profile.sql`; linked DB lint and the post-migration RLS/grant/Realtime/security checks pass. Vercel team `dive-restaurant` and project `prj_JLBEMJVcJsR53G6uefmsVwARwgOL` are linked. The Hobby plan exposes only Production/Preview/Development. Six encrypted variables remain configured for Preview. The inert bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN` is retained. The default CLI deploy unexpectedly created real-app Production `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` (`READY`, aliases assigned); no release claim is made and no remediation will occur without exact owner authorization. Explicit Preview deployments are currently blocked because the local Git author is not recognized as a member of the Vercel team.
+The named Staging Supabase project now contains all 32 reviewed migrations through `20260721155000_staff_self_profile.sql`; linked DB lint and the post-migration RLS/grant/Realtime/security checks pass. Vercel team `dive-restaurant` and project `prj_JLBEMJVcJsR53G6uefmsVwARwgOL` are linked. The Hobby plan exposes only Production/Preview/Development. Six encrypted variables remain configured for Preview. The inert bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN` is retained. Current real-app Preview `dpl_Cio3RFsqiFndX7nD4SjwHQoJLvgN` is `READY` with `target=preview`; hosted route smoke passed in logged-in Chrome. The default CLI deploy unexpectedly created real-app Production `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` (`READY`, aliases assigned); no release claim is made and no remediation will occur without exact owner authorization. Earlier explicit Preview blocks are retained as historical evidence.
 
 ## 2. Environment isolation
 
@@ -119,4 +119,4 @@ Feature flag/traffic rollback, application rollback and database roll-forward ar
 
 Must include target, commit/artifact, migration, backups, tests, known issues, accepted risks, rollback, dashboards, alert contacts, training and support window.
 
-Current deployment status: Staging schema/RLS is verified; no usable current Preview exists because Vercel blocks the commit author before build. The unintended Production deployment `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` is a release-blocking incident requiring exact owner direction. The real app must never use `--prod` or Promote; Production remains a separate `RELEASE` gate.
+Current deployment status: Staging schema/RLS is verified and current Preview `dpl_Cio3RFsqiFndX7nD4SjwHQoJLvgN` is `READY` with `target=preview`; logged-in Chrome route smoke passed for public/customer/staff-boundary surfaces. Hosted transactional/health/operational evidence remains. The unintended Production deployment `dpl_4uXWYhzK8zP5D83UuTazpicEy5h2` is a release-blocking incident under the current no-Production-mutation authorization. The real app must never use `--prod` or Promote; Production remains a separate `RELEASE` gate.

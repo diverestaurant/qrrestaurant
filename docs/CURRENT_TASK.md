@@ -2,11 +2,11 @@
 
 Mode: `BUILD` plus authorized named Staging Supabase/Vercel Preview work
 Milestone: M10–M11 — Staging rehearsal and release-candidate evidence
-Status: In progress; local step 5/7 and Staging schema/RLS step 6/7 complete; Vercel Preview verification is blocked
+Status: In progress; local step 5/7 and Staging schema/RLS step 6/7 complete; current Vercel Preview route smoke passes, hosted transactional/operational evidence remains
 
 ## Objective
 
-Advance Finish Line A without touching Production: checkpoint the fully passing local M3–M9 implementation, apply only reviewed additive migrations to the named Staging Supabase project, verify RLS/isolation/integrity, deploy the current real app only as Vercel Preview, then complete hosted Golden Path and remaining M10/M11 evidence.
+Advance Finish Line A without touching Production: checkpoint the fully passing local M3–M9 implementation, apply only reviewed additive migrations to the named Staging Supabase project, verify RLS/isolation/integrity, verify the current real app only as Vercel Preview, then complete hosted Golden Path and remaining M10/M11 evidence.
 
 ## Current authoritative evidence
 
@@ -38,8 +38,8 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 2. Obtain refreshed current-session authorization accepted by the remote tool boundary; the previous attempt was denied against a stale `EXTERNAL_SCOPE=NONE` snapshot before any remote access.
 3. Use the reviewed migration order/risk record already shown in this handoff; no seed, reset or delete was used.
 4. Verify migration history, RLS coverage, grants, Realtime publication and basic data integrity on the named Staging project — complete for schema/RLS scope.
-5. Resolve the Vercel team-access identity gate and obtain exact owner direction for unintended Production deployment remediation.
-6. Deploy the current app only with explicit `--target=preview --skip-domain`, verify `READY` and `inspect.target=preview`, then run hosted health/public/customer/staff authorization Golden Paths.
+5. Verify the current Preview `dpl_Cio3RFsqiFndX7nD4SjwHQoJLvgN` is `READY` with `target=preview`, then run hosted public/customer/staff-boundary smoke — complete for route scope.
+6. Resolve the remaining hosted health/transactional/operational evidence without submitting real orders or using real credentials; the browser `/api/health` navigation was blocked by `ERR_BLOCKED_BY_CLIENT`.
 7. Continue M10/M11 manual device/screen-reader/usability, hosted backup/restore/observability and release-input evidence.
 
 ## Boundaries
@@ -47,4 +47,4 @@ Advance Finish Line A without touching Production: checkpoint the fully passing 
 - Never use `--prod`, Promote or any Production mutation for the real app.
 - Never reset/delete Staging data or use a destructive migration without new explicit approval.
 - Never use real customer data, real payments, real passwords or paid services.
-- Finish Line A remains `NOT_MET` until a usable Preview hosted Golden Path, manual/operational evidence and owner gates are evidenced.
+- Finish Line A remains `NOT_MET` until the hosted transactional Golden Path, manual/operational evidence and owner gates are evidenced.
