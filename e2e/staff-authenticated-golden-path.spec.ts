@@ -143,6 +143,8 @@ test("synthetic manager can complete discount, multi-tender, receipt and close r
   await page.goto("/");
   const auth = await signInSyntheticStaff(page);
   const admin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false } });
+  const financeTableId = randomUUID();
+  const financeTableLabel = `F-${financeTableId.slice(0, 6)}`;
   const financeSessionId = randomUUID();
   const cleanup = async () => {
     await admin.from("customer_session_grants").delete().eq("session_id", financeSessionId);
@@ -151,8 +153,11 @@ test("synthetic manager can complete discount, multi-tender, receipt and close r
     await admin.from("discounts").delete().eq("session_id", financeSessionId);
     await admin.from("receipts").delete().eq("session_id", financeSessionId);
     await admin.from("dining_sessions").delete().eq("id", financeSessionId);
+    await admin.from("restaurant_tables").delete().eq("id", financeTableId);
   };
-  const seeded = await admin.from("dining_sessions").insert({ id: financeSessionId, restaurant_id: restaurantId, branch_id: branchId, table_id: "00000000-0000-4000-8000-000000000602", state: "OPEN", guest_count: 2, business_date: new Date().toISOString().slice(0, 10), total_due_minor: 3000, currency: "MYR" });
+  const table = await admin.from("restaurant_tables").insert({ id: financeTableId, restaurant_id: restaurantId, branch_id: branchId, label: financeTableLabel, capacity: 2, active: true });
+  if (table.error) throw table.error;
+  const seeded = await admin.from("dining_sessions").insert({ id: financeSessionId, restaurant_id: restaurantId, branch_id: branchId, table_id: financeTableId, state: "OPEN", guest_count: 2, business_date: new Date().toISOString().slice(0, 10), total_due_minor: 3000, currency: "MYR" });
   if (seeded.error) throw seeded.error;
   try {
     const discount = await apiJson(page, `/api/v1/staff/sessions/${financeSessionId}/discounts`, { method: "POST", body: { kind: "PERCENT", percentageBasisPoints: 1000, reason: "Synthetic manager authorization", expectedSessionVersion: 1, idempotencyKey: randomUUID() } });
@@ -173,6 +178,16 @@ test("synthetic manager can complete discount, multi-tender, receipt and close r
     const receipt = await apiJson(page, `/api/v1/staff/sessions/${financeSessionId}/receipt`, { method: "POST", body: { idempotencyKey: randomUUID() } });
     expect(receipt.status).toBe(201);
     expect(receipt.body.data.receiptNumber).toMatch(/^\d{8}-\d{6}$/);
+    expect(receipt.body.data.snapshot).toMatchObject({ snapshotVersion: 1, tableLabel: financeTableLabel, restaurant: { name: "DIVE Restaurant Demo" }, branch: { name: "DIVE Demo Branch" }, totalDueMinor: 2700, totalPaidMinor: 2700 });
+    await page.goto(`/cashier/receipts/${receipt.body.data.receiptId}/print`);
+    await expect(page.getByText("Immutable receipt snapshot")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "DIVE Restaurant Demo" })).toBeVisible();
+    await expect(page.getByText(`Receipt ${receipt.body.data.receiptNumber}`)).toBeVisible();
+    await expect(page.getByText("Table", { exact: true }).locator("..")).toContainText(financeTableLabel);
+    await expect(page.getByRole("button", { name: "Print / Save PDF" })).toBeVisible();
+    await page.emulateMedia({ media: "print" });
+    await expect(page.getByRole("button", { name: "Print / Save PDF" })).toBeHidden();
+    await page.emulateMedia({ media: "screen" });
     const closeBody = { expectedSessionVersion: 6, idempotencyKey: randomUUID() };
     const close = await apiJson(page, `/api/v1/staff/sessions/${financeSessionId}/close`, { method: "POST", body: closeBody });
     expect(close.status).toBe(200);
@@ -284,7 +299,15 @@ test("Admin UI commits menu, table, QR, station and feature-flag operations", as
     const tableRow = page.getByRole("group", { name: `Table ${tableLabel}` });
     await expect(tableRow).toBeVisible();
     await tableRow.getByRole("button", { name: "Rotate QR" }).click();
-    await expect(page.getByText(new RegExp(`One-time QR entry for ${tableLabel}`))).toBeVisible();
+    await expect(page.getByText(new RegExp(`One-time Table Entry QR for ${tableLabel}`))).toBeVisible();
+    const qrImage = page.getByRole("img", { name: `Table Entry QR for ${tableLabel}` });
+    await expect(qrImage).toBeVisible();
+    await expect(qrImage).toHaveAttribute("src", /^data:image\/png;base64,/);
+    await expect(page.getByRole("button", { name: "Print Table QR" })).toBeVisible();
+    await page.emulateMedia({ media: "print" });
+    await expect(page.getByRole("button", { name: "Print Table QR" })).toBeHidden();
+    await expect(qrImage).toBeVisible();
+    await page.emulateMedia({ media: "screen" });
 
     const stationPanel = page.getByRole("heading", { name: "Kitchen stations" }).locator("..");
     await stationPanel.getByLabel("Key").fill(stationKey);
@@ -411,6 +434,57 @@ test("Platform UI creates, replays, suspends and reactivates an isolated tenant"
       expect(catalog.status).toBe(200);
       return catalog.body.data.find((entry: { restaurantId: string }) => entry.restaurantId === first.body.data.restaurantId);
     }).toMatchObject({ restaurantId: first.body.data.restaurantId, status: "ACTIVE", subscription: { planKey: "E2E_MANUAL", status: "ACTIVE", version: 4 } });
+  } finally {
+    await account.admin.auth.admin.deleteUser(account.userId);
+  }
+});
+
+test("Owner UI creates, replays, suspends and reactivates a Branch", async ({ page }) => {
+  await page.goto("/");
+  const account = await signInSyntheticStaff(page, ownerRoleId);
+  const suffix = randomUUID().slice(0, 8);
+  const branchName = `Synthetic Owner Branch ${suffix}`;
+  try {
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { name: "Branches and lifecycle" })).toBeVisible();
+    const lifecycle = page.getByRole("region", { name: "Branches and lifecycle" });
+    await lifecycle.getByLabel("Branch name").fill(branchName);
+    await lifecycle.getByLabel("Slug", { exact: true }).fill(`owner-branch-${suffix}`);
+    const requestPromise = page.waitForRequest((request) => request.url().endsWith("/api/v1/staff/branches") && request.method() === "POST");
+    const responsePromise = page.waitForResponse((response) => response.url().endsWith("/api/v1/staff/branches") && response.request().method() === "POST");
+    await lifecycle.getByRole("button", { name: "Create Branch" }).click();
+    const [createRequest, createResponse] = await Promise.all([requestPromise, responsePromise]);
+    expect(createResponse.status()).toBe(201);
+    const createCommand = createRequest.postDataJSON();
+    const replay = await apiJson(page, "/api/v1/staff/branches", { method: "POST", body: createCommand });
+    expect(replay.status).toBe(200);
+    expect(replay.body.meta.replay).toBe(true);
+
+    const branch = lifecycle.locator("article").filter({ has: page.getByRole("heading", { name: branchName, exact: true }) });
+    const status = branch.getByLabel(`${branchName} Branch status`);
+    await expect(status).toHaveText("ACTIVE");
+    await branch.getByRole("button", { name: "Suspend Branch" }).click();
+    await expect(status).toHaveText("SUSPENDED");
+    await branch.getByRole("button", { name: "Reactivate Branch" }).click();
+    await expect(status).toHaveText("ACTIVE");
+
+    const catalog = await getJson(page, `/api/v1/staff/branches?restaurantId=${restaurantId}&anchorBranchId=${branchId}`);
+    expect(catalog.status).toBe(200);
+    expect(catalog.body.data.find((entry: { name: string }) => entry.name === branchName)).toMatchObject({ status: "ACTIVE", version: 3, defaultLocale: "en" });
+  } finally {
+    await account.admin.auth.admin.deleteUser(account.userId);
+  }
+});
+
+test("Manager cannot cross the Owner Branch lifecycle boundary", async ({ page }) => {
+  await page.goto("/");
+  const account = await signInSyntheticStaff(page, managerRoleId);
+  try {
+    const catalog = await getJson(page, `/api/v1/staff/branches?restaurantId=${restaurantId}&anchorBranchId=${branchId}`);
+    expect(catalog.status).toBe(403);
+    expect(catalog.body.error.code).toBe("FORBIDDEN");
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { name: "Branches and lifecycle" })).toHaveCount(0);
   } finally {
     await account.admin.auth.admin.deleteUser(account.userId);
   }

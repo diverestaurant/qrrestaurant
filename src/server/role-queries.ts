@@ -7,6 +7,7 @@ import { resolvePublicTableEntry } from "@/modules/sessions/infrastructure/publi
 import {
   readLocalAdminOverview,
   readLocalCashierBoard,
+  readLocalReceiptPrint,
   readLocalWaiterBoard,
 } from "@/modules/staff/infrastructure/local-operations-repository";
 import { logger } from "@/server/observability/logger";
@@ -50,4 +51,8 @@ export async function readCashierPage(branchId: string, sessionId?: string) {
 
 export async function readAdminPage(branchId: string, restaurantId: string) {
   return readLocalAdminOverview(branchId, restaurantId);
+}
+
+export async function readReceiptPrintPage(receiptId: string, branchId: string, restaurantId: string) {
+  return readLocalReceiptPrint(receiptId, branchId, restaurantId);
 }

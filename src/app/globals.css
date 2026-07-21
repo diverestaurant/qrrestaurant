@@ -46,3 +46,12 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 
 html[data-kds-density="compact"] [data-kds-ticket] { padding: 1rem; }
 html[data-kds-density="compact"] [data-kds-ticket] [data-kds-secondary] { margin-top: 0.5rem; }
+
+@media print {
+  @page { margin: 12mm; }
+  body { background: white; }
+  body * { visibility: hidden !important; }
+  [data-print-root], [data-print-root] * { visibility: visible !important; }
+  [data-print-root] { position: absolute !important; inset: 0 auto auto 0 !important; width: 100% !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; }
+  [data-no-print] { display: none !important; }
+}

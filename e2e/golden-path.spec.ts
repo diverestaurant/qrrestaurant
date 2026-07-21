@@ -18,6 +18,12 @@ test("KDS surface hides operational data until staff authorization", async ({ pa
   await expect(page.getByText("Nasi Lemak DIVE")).toHaveCount(0);
 });
 
+test("printable receipt surface requires staff authorization", async ({ page }) => {
+  await page.goto("/cashier/receipts/00000000-0000-4000-8000-000000000001/print");
+  await expect(page.getByRole("heading", { name: "Sign in to operate Cashier" })).toBeVisible();
+  await expect(page.getByText("Immutable receipt snapshot")).toHaveCount(0);
+});
+
 test("staff role pages do not disclose repository snapshots before sign-in", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "staff-desktop", "Staff authorization boundary smoke runs in the staff project only.");
   await page.goto("/waiter");
@@ -154,6 +160,14 @@ test("operations report rejects unauthenticated reads", async ({ request }) => {
 
 test("Platform tenant boundary rejects unauthenticated reads", async ({ request }) => {
   const response = await request.get("/api/v1/platform/tenants");
+  expect(response.status()).toBe(401);
+  const body = await response.json();
+  expect(body.ok).toBe(false);
+  expect(body.error.code).toBe("UNAUTHORIZED");
+});
+
+test("Restaurant Branch catalog rejects unauthenticated reads", async ({ request }) => {
+  const response = await request.get("/api/v1/staff/branches?restaurantId=00000000-0000-4000-8000-000000000001&anchorBranchId=00000000-0000-4000-8000-000000000002");
   expect(response.status()).toBe(401);
   const body = await response.json();
   expect(body.ok).toBe(false);

@@ -45,7 +45,8 @@ values
   ('00000000-0000-4000-8000-000000000213', 'staff.manage', 'Manage Staff'),
   ('00000000-0000-4000-8000-000000000214', 'report.read', 'Read Reports'),
   ('00000000-0000-4000-8000-000000000215', 'audit.read', 'Read Audit'),
-  ('00000000-0000-4000-8000-000000000216', 'session.close', 'Close Session')
+  ('00000000-0000-4000-8000-000000000216', 'session.close', 'Close Session'),
+  ('00000000-0000-4000-8000-000000000217', 'branch.manage', 'Manage Branches')
 on conflict (id) do nothing;
 
 insert into public.role_permissions (role_id, permission_id)

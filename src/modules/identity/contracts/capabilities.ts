@@ -1,5 +1,5 @@
 export const capabilityKeys = [
-  "session.open", "session.close", "session.rotate_join_code", "order.submit", "order.accept", "order.prepare", "order.serve", "payment.begin", "payment.confirm", "discount.apply", "receipt.issue", "menu.manage", "table.manage", "staff.manage", "report.read", "audit.read",
+  "session.open", "session.close", "session.rotate_join_code", "order.submit", "order.accept", "order.prepare", "order.serve", "payment.begin", "payment.confirm", "discount.apply", "receipt.issue", "menu.manage", "table.manage", "branch.manage", "staff.manage", "report.read", "audit.read",
 ] as const;
 
 export type CapabilityKey = (typeof capabilityKeys)[number];

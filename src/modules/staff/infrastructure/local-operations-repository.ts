@@ -2,6 +2,7 @@ import "server-only";
 
 import { AppError } from "@/lib/errors";
 import type { AdminOverviewView } from "@/contracts/view-models";
+import { receiptSnapshotSchema } from "@/modules/payments/contracts/receipt-snapshot";
 import { getServiceRoleSupabaseClient } from "@/server/supabase/service-role";
 
 function minor(value: number | string) {
@@ -109,11 +110,21 @@ export async function readLocalCashierBoard(branchId: string, preferredSessionId
 
 export type LocalAdminOverview = AdminOverviewView;
 
+export async function readLocalReceiptPrint(receiptId: string, branchId: string, restaurantId: string) {
+  const supabase = getServiceRoleSupabaseClient();
+  const result = await supabase.from("receipts").select("id,receipt_number,snapshot,reprint_of").eq("id", receiptId).eq("branch_id", branchId).eq("restaurant_id", restaurantId).maybeSingle();
+  if (result.error) throw new AppError("INTERNAL_ERROR", "Unable to read the immutable receipt snapshot.", true);
+  if (!result.data) return null;
+  const parsed = receiptSnapshotSchema.safeParse(result.data.snapshot);
+  if (!parsed.success) throw new AppError("INTERNAL_ERROR", "The immutable receipt snapshot is invalid.", true);
+  return { id: result.data.id, number: result.data.receipt_number, reprintOf: result.data.reprint_of, snapshot: parsed.data };
+}
+
 export async function readLocalAdminOverview(branchId: string, restaurantId: string): Promise<LocalAdminOverview> {
   const supabase = getServiceRoleSupabaseClient();
   const [branchResult, restaurantResult, restaurantSettingsResult, branchSettingsResult, menuResult, categoriesResult, variantsResult, groupsResult, optionsResult, linksResult, tablesResult, sessions, staffResult, rolesResult, rolePermissionsResult, permissionsResult, stationsResult, flagsResult, auditsResult] = await Promise.all([
-    supabase.from("branches").select("name,currency,timezone,business_day_cutoff,version").eq("id", branchId).eq("restaurant_id", restaurantId).maybeSingle(),
-    supabase.from("restaurants").select("name,default_currency,default_timezone,version").eq("id", restaurantId).maybeSingle(),
+    supabase.from("branches").select("name,slug,currency,timezone,business_day_cutoff,version").eq("id", branchId).eq("restaurant_id", restaurantId).maybeSingle(),
+    supabase.from("restaurants").select("name,slug,default_currency,default_timezone,version").eq("id", restaurantId).maybeSingle(),
     supabase.from("restaurant_settings").select("legal_name,registration_number,tax_registration_number,contact_phone,contact_email,brand_accent,receipt_footer,version").eq("restaurant_id", restaurantId).maybeSingle(),
     supabase.from("branch_settings").select("default_locale,address_line_1,address_line_2,city,postal_code,country_code,contact_phone,contact_email,version").eq("branch_id", branchId).eq("restaurant_id", restaurantId).maybeSingle(),
     supabase.from("menu_items").select("id,category_id,name,description,base_price_minor,currency,station_key,visible,available,sort_order,featured,spice_level,tax_eligible,service_eligible,operating_rules,image_path,image_alt,version").eq("branch_id", branchId).order("sort_order", { ascending: true }).order("name", { ascending: true }),
@@ -146,8 +157,8 @@ export async function readLocalAdminOverview(branchId: string, restaurantId: str
   return {
     branchName: branchResult.data.name,
     settings: {
-      restaurant: { name: restaurantResult.data.name, defaultCurrency: restaurantResult.data.default_currency, defaultTimezone: restaurantResult.data.default_timezone, version: restaurantResult.data.version, legalName: restaurantSettingsResult.data.legal_name ?? "", registrationNumber: restaurantSettingsResult.data.registration_number ?? "", taxRegistrationNumber: restaurantSettingsResult.data.tax_registration_number ?? "", contactPhone: restaurantSettingsResult.data.contact_phone ?? "", contactEmail: restaurantSettingsResult.data.contact_email ?? "", brandAccent: restaurantSettingsResult.data.brand_accent ?? "#0F766E", receiptFooter: restaurantSettingsResult.data.receipt_footer ?? "", settingsVersion: restaurantSettingsResult.data.version },
-      branch: { name: branchResult.data.name, currency: branchResult.data.currency, timezone: branchResult.data.timezone, businessDayCutoff: String(branchResult.data.business_day_cutoff).slice(0, 5), version: branchResult.data.version, defaultLocale: branchSettingsResult.data.default_locale as "en" | "zh" | "ms", addressLine1: branchSettingsResult.data.address_line_1 ?? "", addressLine2: branchSettingsResult.data.address_line_2 ?? "", city: branchSettingsResult.data.city ?? "", postalCode: branchSettingsResult.data.postal_code ?? "", countryCode: branchSettingsResult.data.country_code, contactPhone: branchSettingsResult.data.contact_phone ?? "", contactEmail: branchSettingsResult.data.contact_email ?? "", settingsVersion: branchSettingsResult.data.version },
+      restaurant: { name: restaurantResult.data.name, slug: restaurantResult.data.slug, defaultCurrency: restaurantResult.data.default_currency, defaultTimezone: restaurantResult.data.default_timezone, version: restaurantResult.data.version, legalName: restaurantSettingsResult.data.legal_name ?? "", registrationNumber: restaurantSettingsResult.data.registration_number ?? "", taxRegistrationNumber: restaurantSettingsResult.data.tax_registration_number ?? "", contactPhone: restaurantSettingsResult.data.contact_phone ?? "", contactEmail: restaurantSettingsResult.data.contact_email ?? "", brandAccent: restaurantSettingsResult.data.brand_accent ?? "#0F766E", receiptFooter: restaurantSettingsResult.data.receipt_footer ?? "", settingsVersion: restaurantSettingsResult.data.version },
+      branch: { name: branchResult.data.name, slug: branchResult.data.slug, currency: branchResult.data.currency, timezone: branchResult.data.timezone, businessDayCutoff: String(branchResult.data.business_day_cutoff).slice(0, 5), version: branchResult.data.version, defaultLocale: branchSettingsResult.data.default_locale as "en" | "zh" | "ms", addressLine1: branchSettingsResult.data.address_line_1 ?? "", addressLine2: branchSettingsResult.data.address_line_2 ?? "", city: branchSettingsResult.data.city ?? "", postalCode: branchSettingsResult.data.postal_code ?? "", countryCode: branchSettingsResult.data.country_code, contactPhone: branchSettingsResult.data.contact_phone ?? "", contactEmail: branchSettingsResult.data.contact_email ?? "", settingsVersion: branchSettingsResult.data.version },
     },
     menuItems: menu.length,
     menu,

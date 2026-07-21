@@ -1,6 +1,6 @@
 begin;
 
-select plan(34);
+select plan(38);
 
 select ok(to_regclass('public.discounts') is not null, 'discount snapshots table exists');
 select ok(to_regprocedure('public.apply_session_discount(uuid,text,integer,bigint,text,integer,uuid,uuid)') is not null, 'discount command RPC exists');
@@ -60,6 +60,10 @@ select is((select version::integer from public.dining_sessions where id = '00000
 
 select is((select count(*)::integer from public.issue_receipt('00000000-0000-4000-8000-000000009856'::uuid, '00000000-0000-4000-8000-000000009852'::uuid)), 1, 'cashier can issue one immutable receipt after full payment');
 select ok((select snapshot @> '{"totalDueMinor":2700,"totalPaidMinor":2700}'::jsonb from public.receipts where session_id = '00000000-0000-4000-8000-000000009856' and reprint_of is null), 'receipt snapshot preserves authoritative totals');
+select is((select (snapshot ->> 'snapshotVersion')::integer from public.receipts where session_id = '00000000-0000-4000-8000-000000009856' and reprint_of is null), 1, 'receipt snapshot carries an explicit print contract version');
+select is((select snapshot #>> '{restaurant,name}' from public.receipts where session_id = '00000000-0000-4000-8000-000000009856' and reprint_of is null), 'DIVE Restaurant Demo', 'receipt freezes the Restaurant display name');
+select is((select snapshot #>> '{branch,name}' from public.receipts where session_id = '00000000-0000-4000-8000-000000009856' and reprint_of is null), 'DIVE Demo Branch', 'receipt freezes the Branch display name');
+select is((select snapshot ->> 'tableLabel' from public.receipts where session_id = '00000000-0000-4000-8000-000000009856' and reprint_of is null), 'T14', 'receipt freezes the table label');
 select is((select count(*)::integer from public.reprint_receipt((select id from public.receipts where session_id = '00000000-0000-4000-8000-000000009856' and reprint_of is null), '00000000-0000-4000-8000-000000009852'::uuid)), 1, 'cashier can reprint without changing the original receipt');
 select is((select count(*)::integer from public.close_dining_session('00000000-0000-4000-8000-000000009856'::uuid, 4, '00000000-0000-4000-8000-000000009852'::uuid)), 1, 'cashier can close a fully paid reconciled Session');
 set local role postgres;

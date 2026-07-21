@@ -128,12 +128,13 @@ export function CashierActions({ sessionId, expectedSessionVersion, currency, ou
   });
 
   const issueReceipt = () => run("receipt", async () => {
-    const result = await command<{ receiptNumber: string }>("receipt", `/api/v1/staff/sessions/${sessionId}/receipt`, {});
-    router.refresh();
+    const result = await command<{ receiptId: string; receiptNumber: string }>("receipt", `/api/v1/staff/sessions/${sessionId}/receipt`, {});
+    router.push(`/cashier/receipts/${result.receiptId}/print`);
     return `Receipt ${result.receiptNumber} issued from the immutable bill snapshot.`;
   });
   const reprintReceipt = () => run("reprint", async () => {
-    const result = await command<{ receiptNumber: string }>("reprint", `/api/v1/staff/receipts/${receiptId}/reprint`, {});
+    const result = await command<{ receiptId: string; receiptNumber: string }>("reprint", `/api/v1/staff/receipts/${receiptId}/reprint`, {});
+    router.push(`/cashier/receipts/${result.receiptId}/print`);
     return `Receipt ${result.receiptNumber} reprinted from the original snapshot.`;
   });
   const closeSession = () => run("close", async () => {
