@@ -1,7 +1,7 @@
 # V1 Scope Matrix
 
-Status: Proposed freeze for BUILD  
-Last updated: 2026-07-20  
+Status: Frozen execution baseline for authorized BUILD
+Last updated: 2026-07-21
 Default owner labels are accountable roles, not named people.
 
 | Capability | Scope | Owner | Operational impact / fallback | Acceptance evidence |

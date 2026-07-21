@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { AdminOverviewView } from "@/contracts/view-models";
 import type { SendCommand } from "@/ui/staff/AdminOperations";
+import { LocalizationReadiness } from "@/ui/staff/LocalizationReadiness";
 
 type Props = { canEditRestaurant: boolean; overview: AdminOverviewView; send: SendCommand };
 
@@ -62,5 +63,6 @@ export function AdminSettings({ canEditRestaurant, overview, send }: Props) {
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-3"><button className="min-h-11 rounded-full bg-brand px-5 text-sm font-semibold text-white disabled:bg-slate-300" disabled={!branchDirty} onClick={() => void send("branch:settings", { type: "branch.settings.update", expectedBranchVersion: branch.version, expectedSettingsVersion: branch.settingsVersion, name: branchDraft.name, currency: branchDraft.currency, timezone: branchDraft.timezone, businessDayCutoff: branchDraft.businessDayCutoff, defaultLocale: branchDraft.defaultLocale, addressLine1: branchDraft.addressLine1, addressLine2: branchDraft.addressLine2, city: branchDraft.city, postalCode: branchDraft.postalCode, countryCode: branchDraft.countryCode, contactPhone: branchDraft.contactPhone, contactEmail: branchDraft.contactEmail }).then((result) => { if (result) setBranchDirty(false); })}>Save Branch settings</button><span className="text-xs text-muted">Branch v{branch.version} · settings v{branch.settingsVersion}</span></div>
     </fieldset>
+    <LocalizationReadiness branchName={branch.name} />
   </section>;
 }

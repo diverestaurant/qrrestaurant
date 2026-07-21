@@ -26,7 +26,7 @@ export default async function AdminPage() {
     { title: "Reports", detail: `${overview.openSessions} active Session${overview.openSessions === 1 ? "" : "s"} · repository snapshot`, action: "Open report boundary" },
   ];
   return <RoleShell role="Admin" title="Shape the operation" description={description} freshness={`${overview.branchName} · ${overview.lastSyncedAt}`}>
-    <StaffGate role="Admin" access="authorized" email={access.email}>
+    <StaffGate role="Admin" access="authorized" branchId={localDemoBranchId} email={access.email} profile={access.profile} restaurantId={localDemoRestaurantId}>
       <div className="grid gap-4 sm:grid-cols-2">{controls.map((control) => <article className="rounded-3xl border bg-surface p-6 shadow-sm" key={control.title}><div className="flex items-start justify-between gap-3"><div><h2 className="text-xl font-semibold">{control.title}</h2><p className="mt-2 text-sm text-muted">{control.detail}</p></div><StatusPill label="Committed" tone="success" /></div><p className="mt-7 text-sm text-muted">{control.action}</p></article>)}</div>
       {access.roleKeys.includes("PLATFORM") && <PlatformTenantLifecycle />}
       {(access.roleKeys.includes("OWNER") || access.roleKeys.includes("PLATFORM")) && <AdminBranchLifecycle anchorBranchId={localDemoBranchId} defaultCurrency={overview.settings.restaurant.defaultCurrency} defaultTimezone={overview.settings.restaurant.defaultTimezone} restaurantId={localDemoRestaurantId} />}

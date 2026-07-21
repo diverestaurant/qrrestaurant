@@ -9,9 +9,9 @@ test.describe("local M10 browser hardening", () => {
       await page.goto(route);
       await page.addScriptTag({ content: axeSource });
       const violations = await page.evaluate(async () => {
-        const axe = (window as typeof window & { axe: { run: (context: Document, options: unknown) => Promise<{ violations: Array<{ id: string; impact: string | null; nodes: unknown[] }> }> } }).axe;
+        const axe = (window as typeof window & { axe: { run: (context: Document, options: unknown) => Promise<{ violations: Array<{ id: string; impact: string | null; nodes: Array<{ failureSummary?: string; html: string; target: string[] }> }> }> } }).axe;
         const result = await axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"] } });
-        return result.violations.map((violation) => ({ id: violation.id, impact: violation.impact, nodes: violation.nodes.length }));
+        return result.violations.map((violation) => ({ id: violation.id, impact: violation.impact, nodes: violation.nodes.map((node) => ({ failureSummary: node.failureSummary, html: node.html, target: node.target })) }));
       });
       expect(violations, `${route} accessibility violations`).toEqual([]);
     }

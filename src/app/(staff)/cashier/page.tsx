@@ -23,7 +23,7 @@ export default async function CashierPage({ searchParams }: { searchParams: Prom
   const pendingPayment = board.payments.find((payment) => payment.state === "PENDING");
   const outstanding = session ? Math.max(0, session.totalDueMinor - session.totalPaidMinor) : 0;
   return <RoleShell role="Cashier" title="Close with confidence" description={description} freshness={`${session ? `${session.tableLabel} · ${session.state}` : "No payable Session"} · ${board.lastSyncedAt}`}>
-    <StaffGate role="Cashier" access="authorized" email={access.email}>
+    <StaffGate role="Cashier" access="authorized" branchId={localDemoBranchId} email={access.email} profile={access.profile} restaurantId={localDemoRestaurantId}>
       <nav className="mb-6 rounded-3xl border bg-surface p-5 shadow-sm" aria-label="Select Session"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-semibold tracking-[0.12em] text-brand uppercase">Open bills</p><h2 className="mt-1 text-lg font-semibold">Choose a Session</h2></div><StatusPill label={`${board.sessions.length} active`} tone="info" /></div><div className="mt-4 flex flex-wrap gap-2">{board.sessions.map((choice) => <Link aria-current={choice.id === session?.id ? "page" : undefined} className={`min-h-11 rounded-full border px-4 py-2 text-sm font-semibold ${choice.id === session?.id ? "border-brand bg-brand text-white" : "hover:bg-background"}`} href={`/cashier?sessionId=${choice.id}`} key={choice.id}>{choice.tableLabel} · {formatMoney(choice.outstandingMinor)} · {choice.state.replaceAll("_", " ")}</Link>)}</div></nav>
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <section className="rounded-3xl border bg-surface p-5 shadow-sm sm:p-7">

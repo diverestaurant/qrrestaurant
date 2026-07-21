@@ -267,6 +267,51 @@ test("synthetic manager can operate the KDS, waiter and admin UI gates", async (
   await expect(page.getByRole("heading", { name: "Complete the bill" })).toBeVisible();
 });
 
+test("Admin locale preview falls back safely and survives pseudo-long mobile layout", async ({ page }) => {
+  await page.goto("/");
+  const account = await signInSyntheticStaff(page);
+  try {
+    await page.setViewportSize({ width: 320, height: 740 });
+    await page.goto("/admin");
+    const selector = page.getByLabel("QA locale preview");
+    const preview = page.locator("[data-locale-preview]");
+
+    await selector.selectOption("en-XA");
+    await expect(preview).toHaveAttribute("data-active-locale", "en-XA");
+    await expect(page.getByText(/QA-only expanded English is active/)).toBeVisible();
+    expect(await preview.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+
+    await selector.selectOption("zh");
+    await expect(preview).toHaveAttribute("data-active-locale", "en");
+    await expect(preview).toHaveAttribute("lang", "en");
+    await expect(page.getByText("The Chinese catalog is pending approval, so the complete English catalog is shown.")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  } finally {
+    await account.admin.auth.admin.deleteUser(account.userId);
+  }
+});
+
+test("staff can create and version a scoped self profile", async ({ page }) => {
+  await page.goto("/");
+  const account = await signInSyntheticStaff(page);
+  try {
+    await page.goto("/waiter");
+    await page.getByText("My profile", { exact: true }).click();
+    await page.getByLabel("Display name").fill("Synthetic Floor Lead");
+    await page.getByLabel("Language preference").selectOption("ms");
+    await expect(page.getByText(/English remains active/)).toBeVisible();
+    await page.getByRole("button", { name: "Save my profile" }).click();
+    await expect(page.getByText("Profile saved · version 1")).toBeVisible();
+    await expect(page.getByText("My profile · Synthetic Floor Lead")).toBeVisible();
+
+    const stored = await account.admin.from("profiles").select("display_name,preferred_locale,version").eq("user_id", account.userId).single();
+    if (stored.error) throw stored.error;
+    expect(stored.data).toEqual({ display_name: "Synthetic Floor Lead", preferred_locale: "ms", version: 1 });
+  } finally {
+    await account.admin.auth.admin.deleteUser(account.userId);
+  }
+});
+
 test("Admin UI commits menu, table, QR, station and feature-flag operations", async ({ page }) => {
   await page.goto("/");
   const account = await signInSyntheticStaff(page);

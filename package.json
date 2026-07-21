@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "pretest:e2e": "node scripts/wait-for-local-supabase.mjs",
     "test:e2e": "playwright test",
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
     "db:init": "SUPABASE_TELEMETRY_DISABLED=1 supabase init",

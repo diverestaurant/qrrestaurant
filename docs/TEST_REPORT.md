@@ -1,56 +1,50 @@
 # Test Report
 
-## Latest checkpoint (supersedes older counts below)
+Report date: 2026-07-21
+Environment: local synthetic Supabase/Next.js plus previously authorized named Staging evidence
+Current result: M0–M9 **TESTED LOCALLY**; M10 automated scope **TESTED LOCALLY**; full Finish Line A **NOT COMPLETE**
 
-- `npm run lint` and `npm run typecheck`: PASS.
-- `npm test`: PASS, 22 files / 62 tests.
-- `npx next build --webpack`: PASS on Next.js 16.2.10. Default Turbopack cannot bind its internal sandbox port in this environment; the official Webpack build path provides the production compilation evidence.
-- Local database clean reset through migration `20260721152000`: PASS, 29 pgTAP files / 451 assertions.
-- Last complete `npm run test:e2e`: PASS, 65 passed / 21 expected role skips / zero failures. Targeted Platform tenant authorization/idempotency/lifecycle/subscription UI: PASS, 2/2 after the latest changes; a fresh full matrix remains queued.
-- Prior hosted Vercel evidence: inert bootstrap `dpl_4qCGhsjyXwAj6cTxTFxm3pL8AsBN`; real app Preview `dpl_9ZDvXRQqKjARWiVyiZ386sZszuNn`, `READY`, `inspect.target=preview`. This Preview predates the newest local slices and must be refreshed after database verification.
+## Latest local matrix
 
-Report date: 2026-07-21  
-Mode: `BUILD` + authorized `STAGING_VERIFY` database work  
-Environment: local Node/Supabase/Docker plus the explicitly authorized Staging Supabase database; authorized Vercel project link/Preview configuration and documented first-deployment Production classification incidents; no deployment currently remains
+| Gate | Result | Evidence |
+|---|---|---|
+| Lint | PASS | `eslint .` |
+| TypeScript | PASS | strict `tsc --noEmit` |
+| Unit/domain | PASS | 23 Vitest files / 68 tests |
+| Database | PASS | clean reset through migration `20260721155000`; 31 pgTAP files / 508 assertions |
+| Browser/E2E | PASS | 108 total: 81 passed / 27 expected cross-project skips / 0 failed |
+| Production compile | PASS | Next.js 16.2.10 `next build --webpack`; 17 static pages generated and all current dynamic routes compiled |
+| Dependency high/critical gate | PASS | `npm audit --audit-level=high`: 0 high, 0 critical; 2 moderate build-time PostCSS findings |
 
-## Current result
+The browser matrix covers customer join/order/replay/tracking/service requests and scoped Realtime resync; repository-backed KDS/Waiter/Cashier/Admin; role and unauthenticated boundaries; Branch/Platform lifecycle; settings/Profile/i18n; discount/multi-tender/receipt/close/reconciliation; QR and receipt print; WCAG axe scans; keyboard focus; 320px overflow; offline/reconnect; a 30-request read burst; and synthetic Storage backup/restore.
 
-M0–M2 foundation: **TESTED LOCALLY**. M3 local Session adapters, M4 menu read/mutation, M5–M8 command routes, M9 branch summary boundary and M10 hardening slices: **TESTED LOCALLY**. Full M1–M10 product matrix: **NOT COMPLETE**.
+## Regression findings closed in this checkpoint
 
-## Application evidence
+- Axe intermittently observed the Customer Join button while its hydration-driven disabled-to-enabled color transition was mid-animation (`2.89:1`). Removing that color transition made the enabled state immediately compliant. Repeated targeted verification passed 10/10 and the fresh full matrix passed.
+- Fresh Supabase reset could return before Auth/PostgREST were application-ready. `pretest:e2e` now runs a localhost-only readiness gate; it rejects remote URLs and waits for both local Auth health and an authenticated REST read before Playwright starts.
 
-- `npm run lint` — pass.
-- `npm run typecheck` — pass.
-- `npm test` — pass; 22 test files / 62 tests at the current checkpoint.
-- `npm run build` — pass with Next.js static route generation.
-- `npm run test:e2e` — prior full matrix passes 65 with 21 expected role-specific skips and zero failures; latest targeted Platform flow passes 2/2, including unauthenticated rejection, deterministic replay, data-preserving suspend/reactivate, manual subscription tracking and UI command serialization.
-- `agent-browser` CLI was unavailable locally, so Playwright was used as the browser-verification fallback. This is recorded as a tooling limitation, not remote evidence.
+## Database/security evidence
 
-## Database evidence
+- All 32 migrations are additive; the current reset does not require destructive data operations.
+- Profile migration 155 enables RLS, grants authenticated users self-read only, revokes raw writes, validates active permanent staff scope in a narrow guarded function, uses optimistic versioning, and omits display names from audit/outbox payloads.
+- Full pgTAP coverage includes explicit grants, RLS/cross-tenant isolation, anonymous-vs-staff boundaries, QR/Join Code grants, menu/pricing snapshots, state/version conflicts, payments/receipts/close, settings/reports, Branch/Platform lifecycle, Realtime publication, Storage and concurrency.
+- App-owned migration/reset and pgTAP pass. Supabase-managed extension warnings are not counted as app defects.
 
-- Local Supabase reset applies both migrations and synthetic seed data.
-- App-owned `public` schema lint passes with `--fail-on error`.
-- Local security advisors pass with `--fail-on error`.
-- Local pgTAP suites pass: 451/451 across 29 SQL files, including public entry, menu configuration/snapshots, Storage policy, KDS/waiter/service recovery, financial closure, settings, operations/reconciliation reports, Platform tenant lifecycle, suspended-tenant denial, invitations, Realtime publication, cross-tenant RLS, server-role grants and concurrency hardening.
-- Unauthenticated `POST /api/v1/staff/menu/items/:id/availability` returns 401 before any write.
-- Read-only catalog/data check confirms seeded tenant/menu rows plus explicit public/authenticated grants.
-- A local schema-only portable dump of `public`, `app_private` and `auth` restored into an isolated temporary database; 28 public tables, 50 public policies and 28 RLS-enabled public tables were verified before the temporary database was removed. A public-only dump was intentionally rejected because it omitted the app-owned helper schema.
-- Unscoped lint output from Supabase-managed extension/pgTAP objects is excluded from app-owned evidence.
-- Test isolation note: browser flows intentionally mutate deterministic synthetic fixtures and therefore run before a fresh DB reset for pgTAP; the final 179/179 result above was run after that clean reset.
+## Dependency advisory assessment
 
-## Authorized Staging Supabase evidence
+`npm audit` reports two moderate findings for PostCSS vendored inside Next.js. The app does not accept or transform user-provided CSS at runtime; this PostCSS path is build-time tooling. `npm audit fix --force` proposes a breaking downgrade to Next 9.3.3, so it is rejected. Track the upstream patched Next.js release and upgrade through the pinned dependency review instead of forcing an unsafe downgrade.
 
-- Migration dry-run listed the reviewed 16-file timestamp order; `npx supabase db push --linked --yes` applied all 16 migrations without seed/reset/delete operations.
-- `npx supabase migration list --linked` reports local and remote versions equal for all 16 migrations.
-- The Staging project was confirmed empty before seed; `supabase db push --linked --include-seed --yes` then applied only the reviewed synthetic seed.
-- Read-only integrity query reports 29 public tables, 52 public policies, zero public tables without RLS, zero anon privileges on sensitive tables, zero tenant-scope policy gaps, eight Realtime publication tables, zero duplicate order idempotency groups and zero orphan orders/items/payments/discounts. Seed counts: one restaurant, one branch, three menu items, two sessions, one order and one payment.
-- Staging security and performance advisors reported WARN-level findings only and no ERROR-level finding. Warnings include intentionally executable scoped SECURITY DEFINER RPCs, RLS init-plan optimizations and multiple permissive policies; they remain follow-up items before a production-readiness claim.
-- Vercel team/project link succeeded. Six encrypted variables remain configured for Preview. Custom `staging` target creation returned `Cannot create more than 0 custom environments`. Three first-deployment candidates were classified Production despite Preview requests and were deleted: `dpl_5UEPiviXtKjYGAT4LjRGwcH2iFAk`, `dpl_FcvnDbwLXb6D6xerNeWgK7nmhbBE`, and `dpl_7FVPyweiFt5ZrAWaYSs6nCjJKeCV`; no deployment remains. Current Vercel CLI dry-run passes after `.vercelignore`: 100 files/~0.54 MB, with zero Supabase temp metadata, tests, reports or internal docs in the upload manifest. An inert 448-byte bootstrap dry-run also passes but has not been deployed.
+## Existing Staging evidence
 
-## Not yet evidenced
+- The named Staging Supabase project previously matched the first 16 reviewed migrations and passed RLS/tenant/integrity checks with synthetic seed only.
+- Vercel retains the explicitly authorized inert bootstrap and an earlier real Preview that was `READY` with `inspect.target=preview`.
+- This hosted evidence predates migrations `20260721140000`–`20260721155000` and the newest application slices; it is not current Finish Line evidence.
 
-Manual screen-reader/visual review, representative device and load targets, provider backup/restore, app-level Staging Golden Path and pilot behavior remain open. The local customer and staff pages now use scoped Realtime invalidation adapters that trigger authoritative resync, with reconnect/offline states and bounded polling fallback. The named Staging Supabase schema/RLS/seed verification passes as recorded above. Hosted app verification is not claimed because Vercel requires the first deployment of the new project to be Production and no retained initialization baseline or confirmed Preview deployment exists. The local Storage drill now uploads a synthetic branch-scoped object, downloads it, copies it to a branch-scoped backup key, restores/downloads the copy and byte-compares it before cleanup; this is local object recovery evidence, not hosted provider backup evidence. Direct synthetic staff/anonymous/cashier/report/order RLS and RPC tests plus representative customer/staff HTTP success/replay pass locally; Production remains separately gated.
+## Remaining evidence
 
-## Finish Line effect
+- Reviewed push and verification of the 16 pending migrations on the named Staging project.
+- Fresh Vercel Preview and hosted Golden Path against the updated Staging schema.
+- Manual screen-reader, real target-device/browser, glare/noise/print/usability review and final independent UI sign-off.
+- Hosted/provider backup/restore, observability/alert drill, agreed load model, operational owners and release-blocking business inputs.
 
-Finish Line A: **NOT MET**. The database/RLS scope is `Verified in Staging`; no claim of full app `Verified in Staging`, Production Ready Candidate or Production Ready is made. Vercel hosted verification is blocked by the provider-required first-deployment bootstrap authorization; no deployment currently remains.
+Finish Line A remains **NOT MET**. No Production Ready Candidate, Production deployment or Pilot claim is made.

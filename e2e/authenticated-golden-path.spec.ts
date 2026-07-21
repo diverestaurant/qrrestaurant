@@ -50,7 +50,7 @@ test("synthetic anonymous customer can join, submit and replay an order", async 
   const auth = await signInSyntheticAnonymousCustomer(page);
 
   const join = await apiJson(page, "/api/v1/customer/sessions/join", { method: "POST", body: { sessionId, joinCode: "123456" } });
-  expect(join.status).toBe(200);
+  expect(join.status, JSON.stringify(join.body)).toBe(200);
   expect(join.body.ok).toBe(true);
   expect(join.body.data.grantId).toMatch(/[0-9a-f-]{36}/);
 
@@ -77,7 +77,7 @@ test("synthetic anonymous customer can create and replay a service request", asy
   await page.goto("/");
   await signInSyntheticAnonymousCustomer(page);
   const join = await apiJson(page, "/api/v1/customer/sessions/join", { method: "POST", body: { sessionId, joinCode: "123456" } });
-  expect(join.status).toBe(200);
+  expect(join.status, JSON.stringify(join.body)).toBe(200);
 
   const body = { sessionId, requestType: "WATER", note: "Synthetic local request", idempotencyKey: randomUUID() };
   const first = await apiJson(page, "/api/v1/customer/service-requests", { method: "POST", body });

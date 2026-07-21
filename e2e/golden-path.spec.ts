@@ -174,6 +174,14 @@ test("Restaurant Branch catalog rejects unauthenticated reads", async ({ request
   expect(body.error.code).toBe("UNAUTHORIZED");
 });
 
+test("staff self-profile rejects unauthenticated commands", async ({ request }) => {
+  const response = await request.post("/api/v1/staff/profile", { data: { restaurantId: "00000000-0000-4000-8000-000000000001", branchId: "00000000-0000-4000-8000-000000000002", displayName: "Synthetic", preferredLocale: "en", expectedVersion: 0, idempotencyKey: "00000000-0000-4000-8000-000000000917" } });
+  expect(response.status()).toBe(401);
+  const body = await response.json();
+  expect(body.ok).toBe(false);
+  expect(body.error.code).toBe("UNAUTHORIZED");
+});
+
 test("customer order submission rejects unauthenticated commands", async ({ request }) => {
   const response = await request.post("/api/v1/customer/orders", { data: { sessionId: "00000000-0000-4000-8000-000000009912", items: [{ menuItemId: "00000000-0000-4000-8000-000000000401", quantity: 1, modifierOptionIds: [] }], idempotencyKey: "00000000-0000-4000-8000-000000000903", expectedSessionVersion: 1 } });
   expect(response.status()).toBe(401);
